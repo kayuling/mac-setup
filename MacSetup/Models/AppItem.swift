@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum AppCategory: String, CaseIterable, Identifiable {
     case all          = "All"
@@ -35,6 +36,24 @@ enum InstallMethod {
     case brewFormula(formulaName: String)
     case appStore(url: URL)
     case manual(url: URL)
+
+    var badgeLabel: String {
+        switch self {
+        case .brewCask:    return "Cask"
+        case .brewFormula: return "Formula"
+        case .appStore:    return "App Store"
+        case .manual:      return "Manual"
+        }
+    }
+
+    var badgeColor: Color {
+        switch self {
+        case .brewCask:    return .blue
+        case .brewFormula: return .green
+        case .appStore:    return .indigo
+        case .manual:      return .orange
+        }
+    }
 }
 
 enum InstallStatus: Equatable {

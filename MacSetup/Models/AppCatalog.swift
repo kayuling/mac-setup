@@ -3,6 +3,15 @@ import Foundation
 struct AppCatalog {
     static let all: [AppItem] = brewCasks + brewFormulas + appStoreItems + manualItems
 
+    /// Pre-indexed lookup: category → items (avoids repeated filtering).
+    static let byCategory: [AppCategory: [AppItem]] = {
+        Dictionary(grouping: all, by: \.category)
+    }()
+
+    static func items(for category: AppCategory) -> [AppItem] {
+        category == .all ? all : byCategory[category] ?? []
+    }
+
     // MARK: - Brew Casks
 
     private static let brewCasks: [AppItem] = [

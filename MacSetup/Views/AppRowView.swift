@@ -93,55 +93,42 @@ struct AppRowView: View {
 
 private struct AppIconView: View {
     let item: AppItem
-    @State private var remoteIcon: NSImage? = nil
+    @State private var icon: NSImage? = nil
 
     var body: some View {
         Group {
-            if let icon = resolvedIcon {
+            if let icon {
                 Image(nsImage: icon)
                     .resizable()
                     .interpolation(.high)
                     .frame(width: 28, height: 28)
             } else {
-                // Placeholder while loading / no icon found
                 ZStack {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(badgeColor.opacity(0.18))
+                        .fill(item.method.badgeColor.opacity(0.18))
                     Text(String(item.name.prefix(1)))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(badgeColor)
+                        .foregroundStyle(item.method.badgeColor)
                 }
                 .frame(width: 28, height: 28)
             }
         }
         .task(id: item.id) {
-            guard remoteIcon == nil else { return }
-            // Check cache first (instant), then fetch
+            guard icon == nil else { return }
+            // Prefer local /Applications icon (one-time disk check)
+            if let bundleName = item.bundleName {
+                let path = "/Applications/\(bundleName).app"
+                if FileManager.default.fileExists(atPath: path) {
+                    icon = NSWorkspace.shared.icon(forFile: path)
+                    return
+                }
+            }
+            // Fall back to remote icon
             if let cached = RemoteIconCache.shared.cachedIcon(for: item) {
-                remoteIcon = cached
+                icon = cached
             } else {
-                remoteIcon = await RemoteIconCache.shared.fetchIcon(for: item)
+                icon = await RemoteIconCache.shared.fetchIcon(for: item)
             }
-        }
-    }
-
-    /// Prefer: local /Applications icon → remote fetched icon → nil (shows initial badge)
-    private var resolvedIcon: NSImage? {
-        if let bundleName = item.bundleName {
-            let path = "/Applications/\(bundleName).app"
-            if FileManager.default.fileExists(atPath: path) {
-                return NSWorkspace.shared.icon(forFile: path)
-            }
-        }
-        return remoteIcon
-    }
-
-    private var badgeColor: Color {
-        switch item.method {
-        case .brewCask:    return .blue
-        case .brewFormula: return .green
-        case .appStore:    return .indigo
-        case .manual:      return .orange
         }
     }
 }
@@ -152,31 +139,13 @@ struct InstallMethodBadge: View {
     let method: InstallMethod
 
     var body: some View {
-        Text(label)
+        Text(method.badgeLabel)
             .font(.caption2)
             .fontWeight(.semibold)
             .padding(.horizontal, 7)
             .padding(.vertical, 3)
-            .background(color.opacity(0.12))
-            .foregroundStyle(color)
+            .background(method.badgeColor.opacity(0.12))
+            .foregroundStyle(method.badgeColor)
             .clipShape(Capsule())
-    }
-
-    private var label: String {
-        switch method {
-        case .brewCask:    return "Cask"
-        case .brewFormula: return "Formula"
-        case .appStore:    return "App Store"
-        case .manual:      return "Manual"
-        }
-    }
-
-    private var color: Color {
-        switch method {
-        case .brewCask:    return .blue
-        case .brewFormula: return .green
-        case .appStore:    return .indigo
-        case .manual:      return .orange
-        }
     }
 }

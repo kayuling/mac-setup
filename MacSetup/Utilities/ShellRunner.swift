@@ -89,10 +89,12 @@ struct ShellRunner {
     }
 
     // Injects Homebrew paths into PATH since macOS GUI apps don't inherit shell PATH.
-    static func enrichedEnvironment() -> [String: String] {
+    private static let enrichedEnv: [String: String] = {
         var env = ProcessInfo.processInfo.environment
         let extra = "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         env["PATH"] = extra + ":" + (env["PATH"] ?? "")
         return env
-    }
+    }()
+
+    static func enrichedEnvironment() -> [String: String] { enrichedEnv }
 }

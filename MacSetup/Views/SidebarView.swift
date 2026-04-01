@@ -55,11 +55,10 @@ private struct CategoryRowLabel: View {
 
 private extension SidebarView {
     func totalCount(for category: AppCategory) -> Int {
-        category == .all ? AppCatalog.all.count : AppCatalog.all.filter { $0.category == category }.count
+        AppCatalog.items(for: category).count
     }
 
     func selectedCount(for category: AppCategory) -> Int {
-        let items = category == .all ? AppCatalog.all : AppCatalog.all.filter { $0.category == category }
-        return items.filter { installManager.selectedIDs.contains($0.id) }.count
+        AppCatalog.items(for: category).filter { installManager.selectedIDs.contains($0.id) }.count
     }
 }

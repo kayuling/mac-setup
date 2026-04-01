@@ -5,7 +5,7 @@ struct AppListView: View {
     @Environment(InstallManager.self) private var installManager
 
     private var items: [AppItem] {
-        selectedCategory == .all ? AppCatalog.all : AppCatalog.all.filter { $0.category == selectedCategory }
+        AppCatalog.items(for: selectedCategory)
     }
 
     private var installedCount: Int {
