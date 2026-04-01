@@ -2,7 +2,7 @@
 
 A native macOS app for setting up a new Mac — browse, select, and install all your apps in one click.
 
-![MacSetup Icon](MacSetup/Assets.xcassets/AppIcon.appiconset/icon_128x128.png)
+![MacSetup Icon](MacSetup/Assets.xcassets/AppIcon.appiconset/icon_256x256.png)
 
 ## Features
 
