@@ -1,0 +1,30 @@
+name: MacSetup
+options:
+  bundleIdPrefix: com.kayuling
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGN_IDENTITY: "-"
+    ENABLE_APP_SANDBOX: NO
+    CODE_SIGN_ENTITLEMENTS: MacSetup/MacSetup.entitlements
+
+targets:
+  MacSetup:
+    type: application
+    platform: macOS
+    sources:
+      - MacSetup
+    info:
+      path: MacSetup/Info.plist
+      properties:
+        CFBundleDisplayName: MacSetup
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        LSApplicationCategoryType: public.app-category.utilities
+        NSHumanReadableCopyright: ""

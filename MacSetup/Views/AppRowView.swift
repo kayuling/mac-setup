@@ -1,0 +1,122 @@
+import SwiftUI
+import AppKit
+
+struct AppRowView: View {
+    let item: AppItem
+    @Environment(InstallManager.self) private var installManager
+
+    private var status: InstallStatus { installManager.session.status(for: item) }
+    private var isSelected: Bool { installManager.selectedIDs.contains(item.id) }
+    private var isDisabled: Bool { status == .alreadyInstalled || installManager.isRunning }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            selectionIndicator
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 5) {
+                    Text(item.name)
+                        .foregroundStyle(isDisabled ? .tertiary : .primary)
+
+                    if let website = item.website {
+                        Button {
+                            NSWorkspace.shared.open(website)
+                        } label: {
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.system(size: 10))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .buttonStyle(.plain)
+                        .help(website.scheme == "macappstore" ? "Open in App Store" : (website.host() ?? "Open website"))
+                    }
+                }
+
+                if status == .alreadyInstalled {
+                    Text("Installed")
+                        .font(.caption2)
+                        .foregroundStyle(.quaternary)
+                }
+            }
+
+            Spacer()
+
+            InstallMethodBadge(method: item.method)
+                .opacity(isDisabled ? 0.4 : 1)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(
+            RoundedRectangle(cornerRadius: 7)
+                .fill(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
+        )
+        .animation(.spring(response: 0.2, dampingFraction: 0.8), value: isSelected)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard !isDisabled else { return }
+            installManager.toggle(item)
+        }
+    }
+
+    private var selectionIndicator: some View {
+        ZStack {
+            Circle()
+                .stroke(
+                    isSelected ? Color.accentColor : Color.secondary.opacity(0.28),
+                    lineWidth: 1.5
+                )
+                .frame(width: 18, height: 18)
+
+            if status == .alreadyInstalled {
+                Circle()
+                    .fill(Color.secondary.opacity(0.12))
+                    .frame(width: 18, height: 18)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 8, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            } else if isSelected {
+                Circle()
+                    .fill(Color.accentColor)
+                    .frame(width: 18, height: 18)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(.white)
+            }
+        }
+        .animation(.spring(response: 0.18, dampingFraction: 0.65), value: isSelected)
+    }
+}
+
+// MARK: - InstallMethodBadge
+
+struct InstallMethodBadge: View {
+    let method: InstallMethod
+
+    var body: some View {
+        Text(label)
+            .font(.caption2)
+            .fontWeight(.semibold)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(color.opacity(0.12))
+            .foregroundStyle(color)
+            .clipShape(Capsule())
+    }
+
+    private var label: String {
+        switch method {
+        case .brewCask:    return "Cask"
+        case .brewFormula: return "Formula"
+        case .appStore:    return "App Store"
+        case .manual:      return "Manual"
+        }
+    }
+
+    private var color: Color {
+        switch method {
+        case .brewCask:    return .blue
+        case .brewFormula: return .green
+        case .appStore:    return .indigo
+        case .manual:      return .orange
+        }
+    }
+}
