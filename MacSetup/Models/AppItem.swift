@@ -10,8 +10,6 @@ enum AppCategory: String, CaseIterable, Identifiable {
     case media        = "Media"
     case utilities    = "Utilities"
     case cli          = "CLI Tools"
-    case appStore     = "App Store"
-    case manual       = "Manual"
 
     var id: String { rawValue }
 
@@ -25,8 +23,6 @@ enum AppCategory: String, CaseIterable, Identifiable {
         case .media:        return "play.rectangle"
         case .utilities:    return "wrench.and.screwdriver"
         case .cli:          return "apple.terminal"
-        case .appStore:     return "bag"
-        case .manual:       return "arrow.down.circle"
         }
     }
 }
