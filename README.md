@@ -1,0 +1,75 @@
+# MacSetup
+
+A native macOS app for setting up a new Mac — browse, select, and install all your apps in one click.
+
+![MacSetup Icon](MacSetup/Assets.xcassets/AppIcon.appiconset/icon_128x128.png)
+
+## Features
+
+- **Auto-detection** — scans `/Applications` and `brew list` on launch to grey out already-installed apps
+- **Categorized checklist** — browse by Browsers, Development, AI & LLM, Productivity, Media, Utilities, CLI Tools, App Store, and Manual
+- **One-click install** — runs `brew reinstall --cask` / `brew reinstall` for all selected apps sequentially
+- **Live terminal output** — split-pane progress sheet streams real-time brew logs with color-coded output
+- **Official website links** — every app row has a `↗` link to its official site
+- **Homebrew onboarding** — prompts new users to install Homebrew before first use
+- **Refresh** — re-scans installed status on demand (useful after manually deleting apps)
+
+## App Catalog (35 apps)
+
+| Category | Apps |
+|---|---|
+| Browsers | Dia, Arc, Brave, Chrome |
+| Development | VS Code, iTerm2, Figma |
+| AI & LLM | Ollama, Codex |
+| Productivity | Notion, Notion Calendar, Notion Mail, Raycast, OneDrive |
+| Media | IINA, Affinity Publisher 2 |
+| Utilities | Stats, Surfshark, Webex, Citrix Workspace, Logi Options+, MonitorControl Lite |
+| CLI Tools | git, gh, node, ripgrep, ffmpeg, pandoc, yabai, supabase, gemini-cli, opencode |
+| App Store | Xcode, Amphetamine, LINE, Wallpaper Play |
+| Manual | Claude, Microsoft Word, Antigravity, cmux |
+
+## Requirements
+
+- macOS 14 (Sonoma) or later
+- [Homebrew](https://brew.sh) — the app will prompt you to install it on first launch if missing
+- Xcode 15+ (to build from source)
+
+## Build & Run
+
+```zsh
+# Install dependencies
+brew install xcodegen
+
+# Generate Xcode project
+xcodegen generate
+
+# Open in Xcode
+open MacSetup.xcodeproj
+```
+
+Then press `⌘R` to build and run.
+
+## Build a DMG
+
+```zsh
+./make_dmg.sh
+```
+
+Produces `MacSetup.dmg` in the project root — a standard drag-to-Applications installer.
+
+## Adding Apps
+
+Edit `MacSetup/Models/AppCatalog.swift` and add an `AppItem` entry:
+
+```swift
+AppItem(
+    id: UUID(),
+    name: "My App",
+    category: .utilities,
+    method: .brewCask(caskName: "my-app"),
+    bundleName: "My App",          // .app name in /Applications (for installed detection)
+    website: url("https://myapp.com")
+)
+```
+
+Install methods: `.brewCask`, `.brewFormula`, `.appStore(url:)`, `.manual(url:)`.
