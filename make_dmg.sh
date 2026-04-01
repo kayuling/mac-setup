@@ -31,6 +31,9 @@ rm -rf "$STAGING_DIR"
 mkdir -p "$STAGING_DIR"
 cp -R "$APP_PATH" "$STAGING_DIR/"
 
+echo "==> Codesigning..."
+codesign --force --deep --sign - "$STAGING_DIR/$APP_NAME.app"
+
 create-dmg \
   --volname "$APP_NAME" \
   --window-pos 200 120 \

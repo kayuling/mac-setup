@@ -39,16 +39,10 @@ struct AppCatalog {
     // MARK: - Brew Formulas (CLI Tools)
 
     private static let brewFormulas: [AppItem] = [
-        AppItem(id: UUID(), name: "git",        category: .cli, method: .brewFormula(formulaName: "git"),        website: url("https://git-scm.com")),
-        AppItem(id: UUID(), name: "gh",         category: .cli, method: .brewFormula(formulaName: "gh"),         website: url("https://cli.github.com")),
-        AppItem(id: UUID(), name: "node",       category: .cli, method: .brewFormula(formulaName: "node"),       website: url("https://nodejs.org")),
-        AppItem(id: UUID(), name: "ripgrep",    category: .cli, method: .brewFormula(formulaName: "ripgrep"),    website: url("https://github.com/BurntSushi/ripgrep")),
-        AppItem(id: UUID(), name: "ffmpeg",     category: .cli, method: .brewFormula(formulaName: "ffmpeg"),     website: url("https://ffmpeg.org")),
-        AppItem(id: UUID(), name: "pandoc",     category: .cli, method: .brewFormula(formulaName: "pandoc"),     website: url("https://pandoc.org")),
-        AppItem(id: UUID(), name: "yabai",      category: .cli, method: .brewFormula(formulaName: "yabai"),      website: url("https://github.com/koekeishiya/yabai")),
-        AppItem(id: UUID(), name: "supabase",   category: .cli, method: .brewFormula(formulaName: "supabase"),   website: url("https://supabase.com")),
-        AppItem(id: UUID(), name: "gemini-cli", category: .cli, method: .brewFormula(formulaName: "gemini-cli"), website: url("https://github.com/google-gemini/gemini-cli")),
-        AppItem(id: UUID(), name: "opencode",   category: .cli, method: .brewFormula(formulaName: "opencode"),   website: url("https://opencode.ai")),
+        AppItem(id: UUID(), name: "git",   category: .cli, method: .brewFormula(formulaName: "git"),   website: url("https://git-scm.com")),
+        AppItem(id: UUID(), name: "gh",    category: .cli, method: .brewFormula(formulaName: "gh"),    website: url("https://cli.github.com")),
+        AppItem(id: UUID(), name: "node",  category: .cli, method: .brewFormula(formulaName: "node"),  website: url("https://nodejs.org")),
+        AppItem(id: UUID(), name: "yabai", category: .cli, method: .brewFormula(formulaName: "yabai"), website: url("https://github.com/koekeishiya/yabai")),
     ]
 
     // MARK: - App Store

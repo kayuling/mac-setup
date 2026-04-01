@@ -13,6 +13,9 @@ struct AppRowView: View {
         HStack(spacing: 12) {
             selectionIndicator
 
+            AppIconView(item: item)
+                .opacity(isDisabled ? 0.5 : 1)
+
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 5) {
                     Text(item.name)
@@ -83,6 +86,63 @@ struct AppRowView: View {
             }
         }
         .animation(.spring(response: 0.18, dampingFraction: 0.65), value: isSelected)
+    }
+}
+
+// MARK: - AppIconView
+
+private struct AppIconView: View {
+    let item: AppItem
+    @State private var remoteIcon: NSImage? = nil
+
+    var body: some View {
+        Group {
+            if let icon = resolvedIcon {
+                Image(nsImage: icon)
+                    .resizable()
+                    .interpolation(.high)
+                    .frame(width: 28, height: 28)
+            } else {
+                // Placeholder while loading / no icon found
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(badgeColor.opacity(0.18))
+                    Text(String(item.name.prefix(1)))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(badgeColor)
+                }
+                .frame(width: 28, height: 28)
+            }
+        }
+        .task(id: item.id) {
+            guard remoteIcon == nil else { return }
+            // Check cache first (instant), then fetch
+            if let cached = RemoteIconCache.shared.cachedIcon(for: item) {
+                remoteIcon = cached
+            } else {
+                remoteIcon = await RemoteIconCache.shared.fetchIcon(for: item)
+            }
+        }
+    }
+
+    /// Prefer: local /Applications icon → remote fetched icon → nil (shows initial badge)
+    private var resolvedIcon: NSImage? {
+        if let bundleName = item.bundleName {
+            let path = "/Applications/\(bundleName).app"
+            if FileManager.default.fileExists(atPath: path) {
+                return NSWorkspace.shared.icon(forFile: path)
+            }
+        }
+        return remoteIcon
+    }
+
+    private var badgeColor: Color {
+        switch item.method {
+        case .brewCask:    return .blue
+        case .brewFormula: return .green
+        case .appStore:    return .indigo
+        case .manual:      return .orange
+        }
     }
 }
 

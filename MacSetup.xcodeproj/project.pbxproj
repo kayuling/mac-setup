@@ -14,6 +14,7 @@
 		367FC7FB2FA958FE8368DACB /* InstallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23DF5D96BE40803EBDC7AF11 /* InstallManager.swift */; };
 		6ED5EB69A306A1BCC9A1BB45 /* AppCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FF3AED5733FB3CBAFEBADA /* AppCatalog.swift */; };
 		722A322303D02A8A1E9B49FF /* ShellRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B2597FECAF63F1B24C6069 /* ShellRunner.swift */; };
+		72D8F8A0A4EBD821B11C8442 /* RemoteIconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 816AB2962D9C0BE039350605 /* RemoteIconCache.swift */; };
 		86A2FBB8C127B1B4A9A56B78 /* AppRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E1060B7060452C5ACFC88B /* AppRowView.swift */; };
 		8CEFC8CDD5B52B45F815D275 /* InstallProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB31A621B940C307DB03C59 /* InstallProgressView.swift */; };
 		9A47A2B1BCCEFBBCDDC13DC2 /* BrewChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF023240AD1E6F336BEB517A /* BrewChecker.swift */; };
@@ -35,6 +36,7 @@
 		567645FB82AFDA5F68361644 /* MacSetup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacSetup.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A780B8D25D61F9DECD0D239 /* InstallSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallSession.swift; sourceTree = "<group>"; };
 		7B0F77DF7019A29C945D4831 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		816AB2962D9C0BE039350605 /* RemoteIconCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteIconCache.swift; sourceTree = "<group>"; };
 		A2B2597FECAF63F1B24C6069 /* ShellRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellRunner.swift; sourceTree = "<group>"; };
 		BCB31A621B940C307DB03C59 /* InstallProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallProgressView.swift; sourceTree = "<group>"; };
 		BF023240AD1E6F336BEB517A /* BrewChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewChecker.swift; sourceTree = "<group>"; };
@@ -81,6 +83,7 @@
 			children = (
 				BF023240AD1E6F336BEB517A /* BrewChecker.swift */,
 				23DF5D96BE40803EBDC7AF11 /* InstallManager.swift */,
+				816AB2962D9C0BE039350605 /* RemoteIconCache.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -200,6 +203,7 @@
 				8CEFC8CDD5B52B45F815D275 /* InstallProgressView.swift in Sources */,
 				0B313DCBB46D1F6E68078DB0 /* InstallSession.swift in Sources */,
 				FB2336D258AE4B97206A2A6C /* MacSetupApp.swift in Sources */,
+				72D8F8A0A4EBD821B11C8442 /* RemoteIconCache.swift in Sources */,
 				722A322303D02A8A1E9B49FF /* ShellRunner.swift in Sources */,
 				9D4780B78B791D97D9839E12 /* SidebarView.swift in Sources */,
 			);

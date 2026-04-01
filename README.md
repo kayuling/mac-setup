@@ -14,7 +14,7 @@ A native macOS app for setting up a new Mac — browse, select, and install all 
 - **Homebrew onboarding** — prompts new users to install Homebrew before first use
 - **Refresh** — re-scans installed status on demand (useful after manually deleting apps)
 
-## App Catalog (35 apps)
+## App Catalog (29 apps)
 
 | Category | Apps |
 |---|---|
@@ -24,7 +24,7 @@ A native macOS app for setting up a new Mac — browse, select, and install all 
 | Productivity | Notion, Notion Calendar, Notion Mail, Raycast, OneDrive |
 | Media | IINA, Affinity Publisher 2 |
 | Utilities | Stats, Surfshark, Webex, Citrix Workspace, Logi Options+, MonitorControl Lite |
-| CLI Tools | git, gh, node, ripgrep, ffmpeg, pandoc, yabai, supabase, gemini-cli, opencode |
+| CLI Tools | git, gh, node, yabai |
 | App Store | Xcode, Amphetamine, LINE, Wallpaper Play |
 | Manual | Claude, Microsoft Word, Antigravity, cmux |
 
