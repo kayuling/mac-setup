@@ -2,10 +2,13 @@ import SwiftUI
 
 struct AppListView: View {
     let selectedCategory: AppCategory
+    let searchText: String
     @Environment(InstallManager.self) private var installManager
 
     private var items: [AppItem] {
-        AppCatalog.items(for: selectedCategory)
+        let base = AppCatalog.items(for: selectedCategory)
+        guard !searchText.isEmpty else { return base }
+        return base.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
 
     private var installedCount: Int {
@@ -13,14 +16,23 @@ struct AppListView: View {
     }
 
     var body: some View {
-        List(items) { item in
-            AppRowView(item: item)
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+        Group {
+            if items.isEmpty {
+                emptyState
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 6) {
+                        ForEach(items) { item in
+                            AppRowView(item: item)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 80)
+                }
+            }
         }
-        .listStyle(.plain)
-        .navigationTitle(selectedCategory.rawValue)
+        .background(Color(nsColor: .windowBackgroundColor))
         .safeAreaInset(edge: .bottom, spacing: 0) {
             installBar
         }
@@ -51,6 +63,26 @@ struct AppListView: View {
                 .disabled(installManager.isRunning || installManager.isCheckingInstalled)
             }
         }
+        .navigationTitle(selectedCategory.rawValue)
+    }
+
+    // MARK: - Empty State
+
+    private var emptyState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 36, weight: .light))
+                .foregroundStyle(.quaternary)
+            Text("No apps found")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+            if !searchText.isEmpty {
+                Text("Try a different search term")
+                    .font(.subheadline)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Bottom Install Bar
@@ -59,51 +91,54 @@ struct AppListView: View {
         VStack(spacing: 0) {
             Divider()
             HStack(spacing: 16) {
-                // Stats
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     if installManager.selectedCount > 0 {
                         Text("\(installManager.selectedCount) app\(installManager.selectedCount == 1 ? "" : "s") selected")
-                            .fontWeight(.medium)
+                            .font(.system(size: 13, weight: .semibold))
                             .transition(.opacity)
                     } else {
                         Text("No apps selected")
+                            .font(.system(size: 13))
                             .foregroundStyle(.secondary)
                     }
                     Text("\(installedCount) of \(AppCatalog.all.count) already installed")
-                        .font(.caption)
+                        .font(.system(size: 11))
                         .foregroundStyle(.tertiary)
                 }
                 .animation(.easeInOut(duration: 0.15), value: installManager.selectedCount)
 
                 Spacer()
 
-                // Install button
                 Button {
                     Task { await installManager.installSelected(from: AppCatalog.all) }
                 } label: {
                     if installManager.isRunning {
                         HStack(spacing: 6) {
                             ProgressView()
-                                .scaleEffect(0.7)
+                                .scaleEffect(0.65)
                                 .frame(width: 14, height: 14)
-                            Text("Installing…")
+                            Text("Installing...")
                         }
-                        .frame(minWidth: 140)
+                        .frame(minWidth: 150)
                     } else {
-                        Text(installManager.selectedCount > 0
-                             ? "Install \(installManager.selectedCount) App\(installManager.selectedCount == 1 ? "" : "s")"
-                             : "Install")
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.down.circle.fill")
+                                .font(.system(size: 13))
+                            Text(installManager.selectedCount > 0
+                                 ? "Install \(installManager.selectedCount) App\(installManager.selectedCount == 1 ? "" : "s")"
+                                 : "Install")
+                        }
                         .fontWeight(.semibold)
-                        .frame(minWidth: 140)
+                        .frame(minWidth: 150)
                     }
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .disabled(installManager.selectedCount == 0 || installManager.isRunning)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(.bar)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .background(.ultraThinMaterial)
         }
     }
 }

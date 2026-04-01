@@ -4,15 +4,16 @@ struct ContentView: View {
     @Environment(InstallManager.self) private var installManager
     @State private var selectedCategory: AppCategory? = .all
     @State private var showBrewOnboarding = false
+    @State private var searchText = ""
 
     var body: some View {
         NavigationSplitView {
             SidebarView(selectedCategory: $selectedCategory)
         } detail: {
-            AppListView(selectedCategory: selectedCategory ?? .all)
+            AppListView(selectedCategory: selectedCategory ?? .all, searchText: searchText)
+                .searchable(text: $searchText, placement: .toolbar, prompt: "Search apps...")
         }
         .task {
-            // Show Homebrew onboarding if not installed
             if !BrewChecker.isBrewInstalled {
                 showBrewOnboarding = true
             } else {
@@ -22,7 +23,6 @@ struct ContentView: View {
         .sheet(isPresented: $showBrewOnboarding) {
             BrewOnboardingView {
                 showBrewOnboarding = false
-                // Re-check installed apps once brew is confirmed
                 Task { await installManager.checkAlreadyInstalled(AppCatalog.all) }
             }
         }

@@ -12,30 +12,36 @@ struct BrewOnboardingView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            VStack(spacing: 12) {
-                Image(systemName: "shippingbox.fill")
-                    .font(.system(size: 48))
-                    .foregroundStyle(.orange)
+            VStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(Color.orange.opacity(0.1))
+                        .frame(width: 80, height: 80)
+                    Image(systemName: "shippingbox.fill")
+                        .font(.system(size: 36))
+                        .foregroundStyle(.orange)
+                }
 
-                Text("Homebrew Required")
-                    .font(.title2)
-                    .fontWeight(.bold)
-
-                Text("MacSetup uses Homebrew to install apps automatically.\nPaste the command below into Terminal to get started.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
+                VStack(spacing: 6) {
+                    Text("Homebrew Required")
+                        .font(.system(size: 20, weight: .bold))
+                    Text("MacSetup uses Homebrew to install apps.\nPaste the command below into Terminal to get started.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                }
             }
             .padding(.top, 36)
             .padding(.horizontal, 32)
 
             // Command box
             VStack(alignment: .leading, spacing: 8) {
-                Text("Install Homebrew")
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                Text("Install Command")
+                    .font(.system(size: 10, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
+                    .tracking(0.5)
 
                 HStack(spacing: 0) {
                     Text(installCommand)
@@ -46,7 +52,6 @@ struct BrewOnboardingView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(nsColor: .textBackgroundColor))
 
                     Divider()
 
@@ -59,30 +64,31 @@ struct BrewOnboardingView: View {
                         Image(systemName: copied ? "checkmark" : "doc.on.clipboard")
                             .font(.system(size: 13))
                             .foregroundStyle(copied ? .green : .secondary)
-                            .frame(width: 44)
+                            .frame(width: 44, height: 44)
+                            .contentTransition(.symbolEffect(.replace))
                     }
                     .buttonStyle(.plain)
                     .help("Copy command")
                 }
                 .background(Color(nsColor: .textBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(Color.secondary.opacity(0.15), lineWidth: 1)
                 )
             }
             .padding(.horizontal, 32)
-            .padding(.top, 28)
+            .padding(.top, 24)
 
             // Steps
-            VStack(alignment: .leading, spacing: 10) {
-                StepRow(number: "1", text: "Copy the command above")
-                StepRow(number: "2", text: "Open Terminal (⌘ Space → \"Terminal\")")
-                StepRow(number: "3", text: "Paste and press Return, follow the prompts")
-                StepRow(number: "4", text: "Click \"Check Again\" when done")
+            VStack(alignment: .leading, spacing: 12) {
+                StepRow(number: 1, text: "Copy the command above")
+                StepRow(number: 2, text: "Open Terminal (\u{2318} Space \u{2192} \"Terminal\")")
+                StepRow(number: 3, text: "Paste and press Return")
+                StepRow(number: 4, text: "Click \"Check Again\" when done")
             }
             .padding(.horizontal, 32)
-            .padding(.top, 20)
+            .padding(.top, 22)
 
             Spacer()
 
@@ -94,6 +100,7 @@ struct BrewOnboardingView: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
+                .font(.system(size: 13))
 
                 Spacer()
 
@@ -115,8 +122,8 @@ struct BrewOnboardingView: View {
                 } label: {
                     if isChecking {
                         HStack(spacing: 6) {
-                            ProgressView().scaleEffect(0.7).frame(width: 14, height: 14)
-                            Text("Checking…")
+                            ProgressView().scaleEffect(0.65).frame(width: 14, height: 14)
+                            Text("Checking...")
                         }
                     } else {
                         Text("Check Again")
@@ -126,27 +133,26 @@ struct BrewOnboardingView: View {
                 .disabled(isChecking)
             }
             .padding(.horizontal, 24)
-            .padding(.vertical, 16)
+            .padding(.vertical, 14)
         }
-        .frame(width: 480, height: 440)
+        .frame(width: 500, height: 460)
     }
 }
 
 private struct StepRow: View {
-    let number: String
+    let number: Int
     let text: String
 
     var body: some View {
-        HStack(spacing: 10) {
-            Text(number)
-                .font(.caption2)
-                .fontWeight(.bold)
+        HStack(spacing: 12) {
+            Text("\(number)")
+                .font(.system(size: 10, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
-                .frame(width: 18, height: 18)
-                .background(Color.accentColor, in: Circle())
+                .frame(width: 20, height: 20)
+                .background(Color.accentColor.opacity(0.8), in: Circle())
 
             Text(text)
-                .font(.callout)
+                .font(.system(size: 13))
                 .foregroundStyle(.primary)
         }
     }

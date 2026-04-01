@@ -39,33 +39,44 @@ final class InstallManager {
         isCheckingInstalled = true
         defer { isCheckingInstalled = false }
 
+        // Gather all installed IDs before touching any observable state.
+        var installedIDs: Set<UUID> = []
         let fm = FileManager.default
 
-        // Clear any stale .alreadyInstalled statuses so uninstalled apps are re-enabled
-        for item in catalog where session.statusMap[item.id] == .alreadyInstalled {
-            session.statusMap.removeValue(forKey: item.id)
-        }
-
-        // Check /Applications — catches apps installed any way (direct download, brew, App Store, etc.)
+        // Check /Applications
         for item in catalog {
             if let bundleName = item.bundleName,
                fm.fileExists(atPath: "/Applications/\(bundleName).app") {
-                session.statusMap[item.id] = .alreadyInstalled
-                selectedIDs.remove(item.id)
+                installedIDs.insert(item.id)
             }
         }
 
-        // Check brew list for CLI formulas (no .app bundle to detect)
-        guard BrewChecker.isBrewInstalled else { return }
-
-        let formulas = await BrewChecker.installedFormulas()
-        for item in catalog {
-            guard case .brewFormula(let name) = item.method,
-                  formulas.contains(name),
-                  session.statusMap[item.id] != .alreadyInstalled else { continue }
-            session.statusMap[item.id] = .alreadyInstalled
-            selectedIDs.remove(item.id)
+        // Check brew formulas (await happens here — no observable state has been touched yet)
+        if BrewChecker.isBrewInstalled {
+            let formulas = await BrewChecker.installedFormulas()
+            for item in catalog {
+                guard case .brewFormula(let name) = item.method,
+                      formulas.contains(name) else { continue }
+                installedIDs.insert(item.id)
+            }
         }
+
+        // Build the new status map and selection set, then assign once.
+        var newStatusMap = session.statusMap
+        var newSelectedIDs = selectedIDs
+
+        for item in catalog {
+            if installedIDs.contains(item.id) {
+                newStatusMap[item.id] = .alreadyInstalled
+                newSelectedIDs.remove(item.id)
+            } else if newStatusMap[item.id] == .alreadyInstalled {
+                newStatusMap.removeValue(forKey: item.id)
+            }
+        }
+
+        // Single assignment — one observation event, no flicker.
+        session.statusMap = newStatusMap
+        selectedIDs = newSelectedIDs
     }
 
     // MARK: - Install

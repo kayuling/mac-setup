@@ -20,7 +20,6 @@ struct InstallProgressView: View {
         }.count
     }
 
-    // The item whose logs are displayed — follows active install, or user selection
     private var displayedItem: AppItem? {
         if let id = selectedLogID, let item = selectedItems.first(where: { $0.id == id }) {
             return item
@@ -33,19 +32,13 @@ struct InstallProgressView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // ── Header ──────────────────────────────────────────────────────
             headerBar
-
             Divider()
 
-            // ── Split: app list | terminal ───────────────────────────────
             HStack(spacing: 0) {
-                // Left — app list
                 appList
-
                 Divider()
 
-                // Right — terminal log
                 if let item = displayedItem {
                     TerminalLogView(
                         item: item,
@@ -57,8 +50,7 @@ struct InstallProgressView: View {
                 }
             }
         }
-        .frame(minWidth: 760, minHeight: 500)
-        // Auto-follow the currently installing item unless user manually selected one
+        .frame(minWidth: 800, minHeight: 520)
         .onChange(of: installManager.session.currentlyInstallingID) { _, newID in
             if selectedLogID == nil {
                 selectedLogID = newID
@@ -72,15 +64,20 @@ struct InstallProgressView: View {
     private var headerBar: some View {
         if installManager.session.isComplete {
             HStack(spacing: 14) {
-                Image(systemName: failedCount == 0 ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                    .font(.system(size: 26))
-                    .foregroundStyle(failedCount == 0 ? .green : .orange)
+                ZStack {
+                    Circle()
+                        .fill((failedCount == 0 ? Color.green : Color.orange).opacity(0.12))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: failedCount == 0 ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(failedCount == 0 ? .green : .orange)
+                }
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(failedCount == 0 ? "All done!" : "Completed with issues")
-                        .font(.headline)
+                        .font(.system(size: 14, weight: .semibold))
                     Text(completionSubtitle)
-                        .font(.caption)
+                        .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }
 
@@ -90,34 +87,45 @@ struct InstallProgressView: View {
                     installManager.showProgress = false
                 }
                 .buttonStyle(.borderedProminent)
+                .controlSize(.regular)
                 .keyboardShortcut(.return)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background((failedCount == 0 ? Color.green : Color.orange).opacity(0.07))
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
+            .background((failedCount == 0 ? Color.green : Color.orange).opacity(0.04))
         } else {
-            VStack(spacing: 7) {
-                ProgressView(value: Double(doneCount), total: Double(max(selectedItems.count, 1)))
-                    .tint(.accentColor)
-                HStack {
-                    Text("\(doneCount) of \(selectedItems.count) complete")
-                        .font(.caption)
+            HStack(spacing: 14) {
+                // Circular progress indicator
+                ZStack {
+                    Circle()
+                        .stroke(Color.accentColor.opacity(0.15), lineWidth: 3)
+                        .frame(width: 36, height: 36)
+                    Circle()
+                        .trim(from: 0, to: Double(doneCount) / Double(max(selectedItems.count, 1)))
+                        .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                        .frame(width: 36, height: 36)
+                        .rotationEffect(.degrees(-90))
+                        .animation(.easeInOut(duration: 0.3), value: doneCount)
+                    Text("\(doneCount)/\(selectedItems.count)")
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
                         .foregroundStyle(.secondary)
-                    Spacer()
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Installing apps...")
+                        .font(.system(size: 14, weight: .semibold))
                     if let id = installManager.session.currentlyInstallingID,
                        let item = selectedItems.first(where: { $0.id == id }) {
-                        HStack(spacing: 5) {
-                            ProgressView().scaleEffect(0.55).frame(width: 12, height: 12)
-                            Text("Installing \(item.name)…")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
+                        Text(item.name)
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
                     }
                 }
+
+                Spacer()
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(Color(nsColor: .controlBackgroundColor))
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
         }
     }
 
@@ -138,7 +146,7 @@ struct InstallProgressView: View {
             }
             .padding(8)
         }
-        .frame(width: 220)
+        .frame(width: 240)
         .background(Color(nsColor: .controlBackgroundColor))
     }
 
@@ -149,9 +157,9 @@ struct InstallProgressView: View {
 
     private var completionSubtitle: String {
         var parts: [String] = []
-        if doneCount > 0       { parts.append("\(doneCount) installed") }
-        if failedCount > 0     { parts.append("\(failedCount) failed") }
-        return parts.joined(separator: " · ")
+        if doneCount > 0   { parts.append("\(doneCount) installed") }
+        if failedCount > 0 { parts.append("\(failedCount) failed") }
+        return parts.joined(separator: " \u{00B7} ")
     }
 }
 
@@ -166,16 +174,15 @@ private struct TerminalLogView: View {
         VStack(spacing: 0) {
             // Terminal title bar
             HStack(spacing: 8) {
-                // Traffic light dots (decorative)
                 Circle().fill(Color(red: 1, green: 0.37, blue: 0.34)).frame(width: 10, height: 10)
                 Circle().fill(Color(red: 1, green: 0.73, blue: 0.18)).frame(width: 10, height: 10)
                 Circle().fill(Color(red: 0.22, green: 0.80, blue: 0.36)).frame(width: 10, height: 10)
 
                 Spacer()
 
-                Text("brew install \(brewArg)")
+                Text(brewArg)
                     .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(Color(white: 0.5))
+                    .foregroundStyle(Color(white: 0.45))
 
                 Spacer()
 
@@ -192,18 +199,17 @@ private struct TerminalLogView: View {
                     .help("Copy all logs")
                 }
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(Color(red: 0.15, green: 0.15, blue: 0.17))
+            .background(Color(red: 0.13, green: 0.13, blue: 0.15))
 
-            // Log output
             if logs.isEmpty {
                 emptyState
             } else {
                 logOutput
             }
         }
-        .background(Color(red: 0.09, green: 0.09, blue: 0.11))
+        .background(Color(red: 0.08, green: 0.08, blue: 0.10))
     }
 
     private var logOutput: some View {
@@ -220,7 +226,6 @@ private struct TerminalLogView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    // Blinking cursor while installing
                     if case .installing = status {
                         BlinkingCursor()
                     }
@@ -244,13 +249,13 @@ private struct TerminalLogView: View {
         VStack(spacing: 8) {
             Spacer()
             if case .pending = status {
-                Text("Waiting to install…")
+                Text("Waiting to install...")
                     .font(.system(size: 12, design: .monospaced))
                     .foregroundStyle(Color(white: 0.35))
             } else if case .installing = status {
                 HStack(spacing: 8) {
                     ProgressView().scaleEffect(0.7).colorScheme(.dark)
-                    Text("Starting…")
+                    Text("Starting...")
                         .font(.system(size: 12, design: .monospaced))
                         .foregroundStyle(Color(white: 0.5))
                 }
@@ -266,8 +271,8 @@ private struct TerminalLogView: View {
 
     private var brewArg: String {
         switch item.method {
-        case .brewCask(let name):    return "reinstall --cask \(name)"
-        case .brewFormula(let name): return "reinstall \(name)"
+        case .brewCask(let name):    return "brew install --cask \(name)"
+        case .brewFormula(let name): return "brew install \(name)"
         default:                     return item.name
         }
     }

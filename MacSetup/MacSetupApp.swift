@@ -8,9 +8,9 @@ struct MacSetupApp: App {
         WindowGroup {
             ContentView()
                 .environment(installManager)
-                .frame(minWidth: 900, minHeight: 580)
+                .frame(minWidth: 960, minHeight: 640)
         }
         .windowStyle(.titleBar)
-        .windowToolbarStyle(.unified)
+        .windowToolbarStyle(.unified(showsTitle: false))
     }
 }

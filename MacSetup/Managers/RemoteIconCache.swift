@@ -3,10 +3,11 @@ import Foundation
 
 /// Fetches and caches app icons from the internet.
 ///
-/// Strategy per install method:
-/// - brewFormula (CLI):  GitHub avatar → Clearbit logo
-/// - brewCask / manual:  iTunes Search → GitHub avatar → Clearbit logo
-/// - appStore:           iTunes Search (most accurate for App Store apps)
+/// Resolution priority (after checking local /Applications):
+/// 1. Apple-touch-icon from the app's official website (most reliable)
+/// 2. iTunes Search with strict exact-name matching
+/// 3. GitHub org avatar (for github.com-hosted projects)
+/// 4. Clearbit company logo (fallback)
 @MainActor
 final class RemoteIconCache {
     static let shared = RemoteIconCache()
@@ -35,26 +36,68 @@ final class RemoteIconCache {
     private func resolveIcon(for item: AppItem) async -> NSImage? {
         switch item.method {
         case .brewFormula:
-            // iTunes Search returns random GUI apps for CLI tool names — skip it.
-            // Try GitHub org avatar first (great for github.com-hosted tools).
+            // CLI tools aren't on the App Store — try website sources only.
+            if let website = item.website, let img = await fetchWebsiteIcon(from: website) { return img }
             if let website = item.website, let img = await fetchGitHubAvatar(from: website) { return img }
             if let website = item.website, let host = strippedHost(website),
                let img = await fetchClearbitIcon(domain: host) { return img }
 
         case .brewCask, .manual:
+            // Prefer the official website icon, then iTunes strict match, then fallbacks.
+            if let website = item.website, let img = await fetchWebsiteIcon(from: website) { return img }
             if let img = await fetchItunesIcon(name: item.name) { return img }
             if let website = item.website, let img = await fetchGitHubAvatar(from: website) { return img }
             if let website = item.website, let host = strippedHost(website),
                let img = await fetchClearbitIcon(domain: host) { return img }
 
         case .appStore:
-            // macappstore:// URLs have no domain for Clearbit; iTunes is the right source.
+            // App Store apps are best resolved via iTunes Search.
             if let img = await fetchItunesIcon(name: item.name) { return img }
         }
         return nil
     }
 
     // MARK: - Fetchers
+
+    /// Fetches the apple-touch-icon from a website, which is the official high-res icon
+    /// most sites provide. Falls back to Google's favicon service.
+    private func fetchWebsiteIcon(from website: URL) async -> NSImage? {
+        // Skip non-HTTP(S) URLs (e.g. macappstore://)
+        guard let scheme = website.scheme, ["http", "https"].contains(scheme),
+              let host = website.host(), !host.isEmpty else { return nil }
+
+        // Try standard apple-touch-icon paths (most sites serve a 180px+ icon here)
+        let baseURL = "\(scheme)://\(host)"
+        let touchIconPaths = [
+            "\(baseURL)/apple-touch-icon.png",
+            "\(baseURL)/apple-touch-icon-precomposed.png",
+        ]
+
+        for path in touchIconPaths {
+            if let url = URL(string: path),
+               let (data, response) = try? await URLSession.shared.data(from: url),
+               let httpResponse = response as? HTTPURLResponse,
+               httpResponse.statusCode == 200,
+               let contentType = httpResponse.value(forHTTPHeaderField: "Content-Type"),
+               contentType.contains("image"),
+               let image = NSImage(data: data),
+               image.size.width >= 32 {
+                return image
+            }
+        }
+
+        // Fall back to Google's favicon service (128px)
+        if let url = URL(string: "https://www.google.com/s2/favicons?domain=\(host)&sz=128"),
+           let (data, response) = try? await URLSession.shared.data(from: url),
+           let httpResponse = response as? HTTPURLResponse,
+           httpResponse.statusCode == 200,
+           let image = NSImage(data: data),
+           image.size.width >= 32 {
+            return image
+        }
+
+        return nil
+    }
 
     /// For github.com/<org>/<repo> URLs, fetches the org's GitHub avatar (128px).
     private func fetchGitHubAvatar(from website: URL) async -> NSImage? {
@@ -69,6 +112,7 @@ final class RemoteIconCache {
     }
 
     /// Searches the iTunes/Mac App Store catalog by app name, returns 512px artwork.
+    /// Only returns a result for exact name matches to avoid wrong icons.
     private func fetchItunesIcon(name: String) async -> NSImage? {
         guard let encoded = name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://itunes.apple.com/search?term=\(encoded)&entity=macSoftware&country=us&limit=5&media=software")
@@ -79,9 +123,10 @@ final class RemoteIconCache {
               let results = json["results"] as? [[String: Any]]
         else { return nil }
 
+        // Strict match only — never fall back to a random result
         let best = results.first(where: {
             ($0["trackName"] as? String)?.lowercased() == name.lowercased()
-        }) ?? results.first
+        })
 
         guard let iconURLStr = best?["artworkUrl512"] as? String ?? best?["artworkUrl100"] as? String,
               let iconURL = URL(string: iconURLStr),
@@ -106,7 +151,7 @@ final class RemoteIconCache {
 
     // MARK: - Helpers
 
-    /// Strips "www." prefix from a URL's host for cleaner Clearbit lookups.
+    /// Strips "www." prefix from a URL's host for cleaner lookups.
     private func strippedHost(_ url: URL) -> String? {
         guard let host = url.host(), !host.isEmpty else { return nil }
         return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
