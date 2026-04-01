@@ -8,23 +8,37 @@ struct AppRowView: View {
 
     private var status: InstallStatus { installManager.session.status(for: item) }
     private var isSelected: Bool { installManager.selectedIDs.contains(item.id) }
-    private var isDisabled: Bool { status == .alreadyInstalled || installManager.isRunning }
+    private var isInstalled: Bool { status == .alreadyInstalled }
+    private var isDisabled: Bool { isInstalled || installManager.isRunning }
 
     var body: some View {
-        HStack(spacing: 14) {
-            // Selection checkbox
-            selectionIndicator
+        VStack(alignment: .leading, spacing: 0) {
+            // Top: icon + installed badge
+            HStack(alignment: .top) {
+                AppIconView(item: item)
+                    .scaleEffect(isHovering && !isDisabled ? 1.06 : 1.0)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isHovering)
 
-            // App icon
-            AppIconView(item: item)
-                .opacity(isDisabled ? 0.45 : 1)
+                Spacer()
 
-            // App info
+                if isInstalled {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.green.opacity(0.85))
+                } else {
+                    selectionToggle
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.top, 14)
+
+            // Middle: name + website
             VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 6) {
+                HStack(spacing: 5) {
                     Text(item.name)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(isDisabled ? .tertiary : .primary)
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(isInstalled ? .secondary : .primary)
+                        .lineLimit(1)
 
                     if let website = item.website {
                         Button {
@@ -33,91 +47,66 @@ struct AppRowView: View {
                             Image(systemName: "arrow.up.right")
                                 .font(.system(size: 8, weight: .bold))
                                 .foregroundStyle(.tertiary)
-                                .padding(3)
-                                .background(
-                                    Circle()
-                                        .fill(Color.primary.opacity(0.05))
-                                )
                         }
                         .buttonStyle(.plain)
                         .opacity(isHovering ? 1 : 0)
-                        .help(website.scheme == "macappstore" ? "Open in App Store" : (website.host() ?? "Open website"))
+                        .onHover { inside in
+                            if inside { NSCursor.pointingHand.push() } else { NSCursor.pop() }
+                        }
                     }
                 }
 
-                if status == .alreadyInstalled {
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 9))
-                            .foregroundStyle(.green.opacity(0.7))
-                        Text("Installed")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.secondary)
-                    }
+                if isInstalled {
+                    Text("INSTALLED")
+                        .font(.system(size: 8, weight: .black))
+                        .foregroundStyle(.green)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(.green.opacity(0.1), in: Capsule())
+                } else {
+                    InstallMethodBadge(method: item.method)
                 }
             }
-
-            Spacer()
-
-            // Install method badge
-            InstallMethodBadge(method: item.method)
-                .opacity(isDisabled ? 0.35 : 0.8)
+            .padding(.horizontal, 14)
+            .padding(.top, 10)
+            .padding(.bottom, 14)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(rowBackground)
+            ZStack {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(.background)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(isSelected ? Color.accentColor.opacity(0.06) : Color.clear)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(
+                        isSelected ? Color.accentColor.opacity(0.3) : (isHovering ? Color.primary.opacity(0.08) : Color.clear),
+                        lineWidth: 1
+                    )
+            }
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(isSelected ? Color.accentColor.opacity(0.3) : Color.clear, lineWidth: 1.5)
-        )
-        .animation(.spring(response: 0.2, dampingFraction: 0.8), value: isSelected)
-        .animation(.easeInOut(duration: 0.15), value: isHovering)
+        .shadow(color: .black.opacity(isHovering ? 0.07 : 0.03), radius: isHovering ? 8 : 3, y: isHovering ? 3 : 1)
         .contentShape(Rectangle())
+        .onTapGesture { if !isDisabled { installManager.toggle(item) } }
         .onHover { isHovering = $0 }
-        .onTapGesture {
-            guard !isDisabled else { return }
-            installManager.toggle(item)
-        }
+        .animation(.spring(response: 0.25, dampingFraction: 0.75), value: isHovering)
+        .animation(.spring(response: 0.25, dampingFraction: 0.75), value: isSelected)
     }
 
-    private var rowBackground: Color {
-        if isSelected {
-            return Color.accentColor.opacity(0.08)
-        } else if isHovering && !isDisabled {
-            return Color.primary.opacity(0.03)
-        }
-        return .clear
-    }
-
-    private var selectionIndicator: some View {
+    private var selectionToggle: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 5, style: .continuous)
-                .stroke(
-                    isSelected ? Color.accentColor : Color.secondary.opacity(0.25),
-                    lineWidth: 1.5
-                )
-                .frame(width: 20, height: 20)
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .fill(isSelected ? Color.accentColor : Color.primary.opacity(0.06))
+                .frame(width: 26, height: 26)
 
-            if status == .alreadyInstalled {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color.secondary.opacity(0.08))
-                    .frame(width: 20, height: 20)
+            if isSelected {
                 Image(systemName: "checkmark")
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.quaternary)
-            } else if isSelected {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .fill(Color.accentColor)
-                    .frame(width: 20, height: 20)
-                Image(systemName: "checkmark")
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.system(size: 10, weight: .bold))
                     .foregroundStyle(.white)
             }
         }
-        .animation(.spring(response: 0.18, dampingFraction: 0.65), value: isSelected)
+        .disabled(installManager.isRunning)
+        .onTapGesture { if !installManager.isRunning { installManager.toggle(item) } }
     }
 }
 
@@ -128,31 +117,23 @@ struct AppIconView: View {
     @State private var icon: NSImage? = nil
 
     var body: some View {
-        Group {
+        ZStack {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(.white)
+                .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+
             if let icon {
                 Image(nsImage: icon)
                     .resizable()
                     .interpolation(.high)
-                    .frame(width: 36, height: 36)
-                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    .shadow(color: .black.opacity(0.08), radius: 2, y: 1)
+                    .padding(4)
             } else {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [item.method.badgeColor.opacity(0.2), item.method.badgeColor.opacity(0.1)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                    Text(String(item.name.prefix(1)))
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundStyle(item.method.badgeColor)
-                }
-                .frame(width: 36, height: 36)
+                Text(String(item.name.prefix(1)))
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
+                    .foregroundStyle(item.method.badgeColor)
             }
         }
+        .frame(width: 48, height: 48)
         .task(id: item.id) {
             guard icon == nil else { return }
             if let bundleName = item.bundleName {
@@ -179,15 +160,15 @@ struct InstallMethodBadge: View {
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: method.badgeIcon)
-                .font(.system(size: 8, weight: .semibold))
-            Text(method.badgeLabel)
-                .font(.system(size: 10, weight: .medium))
+                .font(.system(size: 9, weight: .bold))
+            Text(method.badgeLabel.uppercased())
+                .font(.system(size: 9, weight: .black))
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(method.badgeColor.opacity(0.08))
+        .padding(.vertical, 3)
+        .background(method.badgeColor.opacity(0.12))
         .foregroundStyle(method.badgeColor)
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
     }
 }
 
