@@ -28,3 +28,4 @@ targets:
         CFBundleVersion: "1"
         LSApplicationCategoryType: public.app-category.utilities
         NSHumanReadableCopyright: ""
+        CFBundleIconFile: AppIcon

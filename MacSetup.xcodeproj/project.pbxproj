@@ -20,6 +20,7 @@
 		9D4780B78B791D97D9839E12 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0F77DF7019A29C945D4831 /* SidebarView.swift */; };
 		A8373589834D78791BC6D85F /* AppItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D0462918364A40F2D1557D /* AppItem.swift */; };
 		CF86D930D2575EBD70343AF8 /* AppListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C531FF8C83E4B283186B0DCF /* AppListView.swift */; };
+		D42F9300F3D98D55EA05BC87 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2E7B84252E9535DC1C25D86E /* Assets.xcassets */; };
 		FB2336D258AE4B97206A2A6C /* MacSetupApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49D02198274AE512AFECA93 /* MacSetupApp.swift */; };
 /* End PBXBuildFile section */
 
@@ -30,6 +31,7 @@
 		23DF5D96BE40803EBDC7AF11 /* InstallManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallManager.swift; sourceTree = "<group>"; };
 		23FF3AED5733FB3CBAFEBADA /* AppCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCatalog.swift; sourceTree = "<group>"; };
 		2688AF23A917AAAAECC8BB54 /* BrewOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewOnboardingView.swift; sourceTree = "<group>"; };
+		2E7B84252E9535DC1C25D86E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		567645FB82AFDA5F68361644 /* MacSetup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacSetup.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A780B8D25D61F9DECD0D239 /* InstallSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallSession.swift; sourceTree = "<group>"; };
 		7B0F77DF7019A29C945D4831 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 		8E39ADC05373570E55AE821B /* MacSetup */ = {
 			isa = PBXGroup;
 			children = (
+				2E7B84252E9535DC1C25D86E /* Assets.xcassets */,
 				03B39043A094BE6BD1093D08 /* Info.plist */,
 				F9452A9FA1F0871799520469 /* MacSetup.entitlements */,
 				C49D02198274AE512AFECA93 /* MacSetupApp.swift */,
@@ -123,6 +126,7 @@
 			buildConfigurationList = FE60226BB95E32E36369AB11 /* Build configuration list for PBXNativeTarget "MacSetup" */;
 			buildPhases = (
 				371F8B2FBBFA031B5DA47970 /* Sources */,
+				EE766BECC23699BC94110025 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -167,6 +171,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EE766BECC23699BC94110025 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D42F9300F3D98D55EA05BC87 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		371F8B2FBBFA031B5DA47970 /* Sources */ = {
