@@ -7,8 +7,5 @@ build/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 DerivedData/
 
-# DMG output
-*.dmg
-
 # Screenshots
 Screenshot*.png
