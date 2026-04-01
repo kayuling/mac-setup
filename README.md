@@ -28,13 +28,21 @@ A native macOS app for setting up a new Mac — browse, select, and install all 
 | App Store | Xcode, Amphetamine, LINE, Wallpaper Play |
 | Manual | Claude, Microsoft Word, Antigravity, cmux |
 
+## Quick Install
+
+1. Download **[MacSetup.dmg](MacSetup.dmg)**
+2. Open the DMG and drag **MacSetup.app** into your Applications folder
+3. Launch MacSetup from Applications or Spotlight
+4. If prompted, install Homebrew first — the app will walk you through it
+5. Select the apps you want, click **Install** — done
+
 ## Requirements
 
 - macOS 14 (Sonoma) or later
 - [Homebrew](https://brew.sh) — the app will prompt you to install it on first launch if missing
 - Xcode 15+ (to build from source)
 
-## Build & Run
+## Build from Source
 
 ```zsh
 # Install dependencies
