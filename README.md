@@ -7,26 +7,26 @@ A native macOS app for setting up a new Mac — browse, select, and install all 
 ## Features
 
 - **Auto-detection** — scans `/Applications` and `brew list` on launch to grey out already-installed apps
-- **Categorized checklist** — browse by Browsers, Development, AI & LLM, Productivity, Media, Utilities, CLI Tools, App Store, and Manual
+- **Categorized sidebar** — browse by Browsers, Development, AI & LLM, Productivity, Media, Utilities, and CLI Tools with color-coded icons
+- **Search** — quickly find apps across all categories from the toolbar
 - **One-click install** — runs `brew reinstall --cask` / `brew reinstall` for all selected apps sequentially
-- **Live terminal output** — split-pane progress sheet streams real-time brew logs with color-coded output
-- **Official website links** — every app row has a `↗` link to its official site
+- **Live terminal output** — split-pane progress sheet with circular progress ring and color-coded brew logs
+- **Official app icons** — fetches icons from each app's official website, iTunes, or GitHub
+- **Hover interactions** — card-style rows with hover effects and contextual website links
 - **Homebrew onboarding** — prompts new users to install Homebrew before first use
-- **Refresh** — re-scans installed status on demand (useful after manually deleting apps)
+- **Refresh** — re-scans installed status on demand with glitch-free atomic updates
 
-## App Catalog (29 apps)
+## App Catalog (30 apps)
 
 | Category | Apps |
 |---|---|
 | Browsers | Dia, Arc, Brave, Chrome |
-| Development | VS Code, iTerm2, Figma |
-| AI & LLM | Ollama, Codex |
-| Productivity | Notion, Notion Calendar, Notion Mail, Raycast, OneDrive |
-| Media | IINA, Affinity Publisher 2 |
-| Utilities | Stats, Surfshark, Webex, Citrix Workspace, Logi Options+, MonitorControl Lite |
+| Development | VS Code, iTerm2, Xcode, cmux |
+| AI & LLM | Ollama, Codex, Claude |
+| Productivity | Notion, Notion Calendar, Notion Mail, Raycast, Webex, LINE, Microsoft Word |
+| Media | IINA, Figma, Affinity Publisher 2, Wallpaper Play |
+| Utilities | OneDrive, Stats, Surfshark, Citrix Workspace, Logi Options+, MonitorControl Lite, Amphetamine, Antigravity |
 | CLI Tools | git, gh, node, yabai |
-| App Store | Xcode, Amphetamine, LINE, Wallpaper Play |
-| Manual | Claude, Microsoft Word, Antigravity, cmux |
 
 ## Quick Install
 
