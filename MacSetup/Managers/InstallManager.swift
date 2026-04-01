@@ -101,9 +101,9 @@ final class InstallManager {
 
             switch item.method {
             case .brewCask(let name):
-                await runBrew(item: item, arguments: ["install", "--cask", name])
+                await runBrew(item: item, arguments: ["reinstall", "--cask", name])
             case .brewFormula(let name):
-                await runBrew(item: item, arguments: ["install", name])
+                await runBrew(item: item, arguments: ["reinstall", name])
             case .appStore(let url):
                 NSWorkspace.shared.open(url)
                 session.statusMap[item.id] = .done

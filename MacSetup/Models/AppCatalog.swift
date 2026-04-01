@@ -21,6 +21,7 @@ struct AppCatalog {
         // Productivity
         AppItem(id: UUID(), name: "Notion",               category: .productivity,  method: .brewCask(caskName: "notion"),                 bundleName: "Notion",               website: url("https://www.notion.so")),
         AppItem(id: UUID(), name: "Notion Calendar",      category: .productivity,  method: .brewCask(caskName: "notion-calendar"),        bundleName: "Notion Calendar",      website: url("https://www.notion.so")),
+        AppItem(id: UUID(), name: "Notion Mail",          category: .productivity,  method: .brewCask(caskName: "notion-mail"),            bundleName: "Notion Mail",          website: url("https://www.notion.so/product/mail")),
         AppItem(id: UUID(), name: "Raycast",              category: .productivity,  method: .brewCask(caskName: "raycast"),                bundleName: "Raycast",              website: url("https://www.raycast.com")),
         AppItem(id: UUID(), name: "OneDrive",             category: .productivity,  method: .brewCask(caskName: "onedrive"),               bundleName: "OneDrive",             website: url("https://www.microsoft.com/en-us/microsoft-365/onedrive")),
         // Media
@@ -62,9 +63,9 @@ struct AppCatalog {
     // MARK: - Manual Downloads
 
     private static let manualItems: [AppItem] = [
-        AppItem(id: UUID(), name: "Claude",         category: .manual, method: .manual(url: url("https://claude.ai")!),         bundleName: "Claude",        website: url("https://claude.ai")),
+        AppItem(id: UUID(), name: "Claude",         category: .manual, method: .manual(url: url("https://claude.ai/downloads")!), bundleName: "Claude",        website: url("https://claude.ai/downloads")),
         AppItem(id: UUID(), name: "Microsoft Word", category: .manual, method: .manual(url: url("https://www.microsoft.com")!), bundleName: "Microsoft Word", website: url("https://www.microsoft.com/en-us/microsoft-365/word")),
-        AppItem(id: UUID(), name: "Antigravity",    category: .manual, method: .manual(url: url("https://antigravity.app")!),   bundleName: "Antigravity",   website: url("https://antigravity.app")),
+        AppItem(id: UUID(), name: "Antigravity",    category: .manual, method: .manual(url: url("https://antigravity.google/")!), bundleName: "Antigravity",   website: url("https://antigravity.google/")),
         AppItem(id: UUID(), name: "cmux",           category: .manual, method: .manual(url: url("https://github.com")!),        bundleName: "cmux",          website: nil),
     ]
 

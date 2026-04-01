@@ -266,8 +266,8 @@ private struct TerminalLogView: View {
 
     private var brewArg: String {
         switch item.method {
-        case .brewCask(let name):    return "--cask \(name)"
-        case .brewFormula(let name): return name
+        case .brewCask(let name):    return "reinstall --cask \(name)"
+        case .brewFormula(let name): return "reinstall \(name)"
         default:                     return item.name
         }
     }
