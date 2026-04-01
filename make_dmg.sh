@@ -24,16 +24,25 @@ brew install create-dmg 2>/dev/null || true
 
 echo "==> Creating DMG..."
 rm -f "$DMG_OUTPUT"
+
+# Stage only the .app — avoids dSYM / swiftmodule clutter in the DMG
+STAGING_DIR="$BUILD_DIR/dmg-staging"
+rm -rf "$STAGING_DIR"
+mkdir -p "$STAGING_DIR"
+cp -R "$APP_PATH" "$STAGING_DIR/"
+
 create-dmg \
   --volname "$APP_NAME" \
   --window-pos 200 120 \
-  --window-size 600 400 \
-  --icon-size 100 \
-  --icon "$APP_NAME.app" 175 190 \
+  --window-size 540 380 \
+  --icon-size 120 \
+  --icon "$APP_NAME.app" 160 185 \
   --hide-extension "$APP_NAME.app" \
-  --app-drop-link 425 190 \
+  --app-drop-link 380 185 \
   "$DMG_OUTPUT" \
-  "$RELEASE_DIR/"
+  "$STAGING_DIR/"
+
+rm -rf "$STAGING_DIR"
 
 echo ""
 echo "✓ Done: $(pwd)/$DMG_OUTPUT"
