@@ -68,7 +68,7 @@ struct AppCatalog {
     private static let manualItems: [AppItem] = [
         AppItem(id: UUID(), name: "Claude",         category: .ai,            method: .manual(url: url("https://claude.ai/downloads")!),   bundleName: "Claude",         website: url("https://claude.ai/downloads")),
         AppItem(id: UUID(), name: "Microsoft Word", category: .productivity,  method: .manual(url: url("https://www.microsoft.com")!),     bundleName: "Microsoft Word", website: url("https://www.microsoft.com/en-us/microsoft-365/word")),
-        AppItem(id: UUID(), name: "Antigravity",    category: .utilities,     method: .manual(url: url("https://antigravity.google/")!),   bundleName: "Antigravity",    website: url("https://antigravity.google/")),
+        AppItem(id: UUID(), name: "Antigravity (Google)", category: .dev,      method: .manual(url: url("https://antigravity.google/")!),   bundleName: "Antigravity",    website: url("https://antigravity.google/")),
         AppItem(id: UUID(), name: "cmux",           category: .dev,           method: .manual(url: url("https://github.com")!),            bundleName: "cmux",           website: nil),
     ]
 

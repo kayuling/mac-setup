@@ -21,11 +21,11 @@ A native macOS app for setting up a new Mac — browse, select, and install all 
 | Category | Apps |
 |---|---|
 | Browsers | Dia, Arc, Brave, Chrome |
-| Development | VS Code, iTerm2, Xcode, cmux |
+| Development | VS Code, iTerm2, Xcode, cmux, Antigravity (Google) |
 | AI & LLM | Ollama, Codex, Claude |
 | Productivity | Notion, Notion Calendar, Notion Mail, Raycast, Webex, LINE, Microsoft Word |
 | Media | IINA, Figma, Affinity Publisher 2, Wallpaper Play |
-| Utilities | OneDrive, Stats, Surfshark, Citrix Workspace, Logi Options+, MonitorControl Lite, Amphetamine, Antigravity |
+| Utilities | OneDrive, Stats, Surfshark, Citrix Workspace, Logi Options+, MonitorControl Lite, Amphetamine |
 | CLI Tools | git, gh, node, yabai |
 
 ## Quick Install
