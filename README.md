@@ -36,6 +36,13 @@ A native macOS app for setting up a new Mac — browse, select, and install all 
 4. If prompted, install Homebrew first — the app will walk you through it
 5. Select the apps you want, click **Install** — done
 
+> **"MacSetup.app is damaged and can't be opened"**
+> macOS quarantines apps downloaded from the internet that aren't notarized by Apple. To fix, run this in Terminal **after dragging to Applications**:
+> ```zsh
+> xattr -cr /Applications/MacSetup.app
+> ```
+> This removes the quarantine flag and the app will open normally. You only need to do this once.
+
 ## Requirements
 
 - macOS 14 (Sonoma) or later
