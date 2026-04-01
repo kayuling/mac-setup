@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0B313DCBB46D1F6E68078DB0 /* InstallSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A780B8D25D61F9DECD0D239 /* InstallSession.swift */; };
 		15030644E83B15B3BF4883D1 /* AppRowProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E17460C9DED709EC6DFA6CE /* AppRowProgressView.swift */; };
+		173B45D51AF2CD989BF433E1 /* BrewOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2688AF23A917AAAAECC8BB54 /* BrewOnboardingView.swift */; };
 		2944AC3A607C84D99587F1E0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075F97714D71BF791B2AF5D3 /* ContentView.swift */; };
 		367FC7FB2FA958FE8368DACB /* InstallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23DF5D96BE40803EBDC7AF11 /* InstallManager.swift */; };
 		6ED5EB69A306A1BCC9A1BB45 /* AppCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FF3AED5733FB3CBAFEBADA /* AppCatalog.swift */; };
@@ -28,6 +29,7 @@
 		0E17460C9DED709EC6DFA6CE /* AppRowProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRowProgressView.swift; sourceTree = "<group>"; };
 		23DF5D96BE40803EBDC7AF11 /* InstallManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallManager.swift; sourceTree = "<group>"; };
 		23FF3AED5733FB3CBAFEBADA /* AppCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCatalog.swift; sourceTree = "<group>"; };
+		2688AF23A917AAAAECC8BB54 /* BrewOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewOnboardingView.swift; sourceTree = "<group>"; };
 		567645FB82AFDA5F68361644 /* MacSetup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacSetup.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A780B8D25D61F9DECD0D239 /* InstallSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallSession.swift; sourceTree = "<group>"; };
 		7B0F77DF7019A29C945D4831 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
@@ -56,6 +58,7 @@
 				C531FF8C83E4B283186B0DCF /* AppListView.swift */,
 				0E17460C9DED709EC6DFA6CE /* AppRowProgressView.swift */,
 				D8E1060B7060452C5ACFC88B /* AppRowView.swift */,
+				2688AF23A917AAAAECC8BB54 /* BrewOnboardingView.swift */,
 				075F97714D71BF791B2AF5D3 /* ContentView.swift */,
 				BCB31A621B940C307DB03C59 /* InstallProgressView.swift */,
 				7B0F77DF7019A29C945D4831 /* SidebarView.swift */,
@@ -176,6 +179,7 @@
 				15030644E83B15B3BF4883D1 /* AppRowProgressView.swift in Sources */,
 				86A2FBB8C127B1B4A9A56B78 /* AppRowView.swift in Sources */,
 				9A47A2B1BCCEFBBCDDC13DC2 /* BrewChecker.swift in Sources */,
+				173B45D51AF2CD989BF433E1 /* BrewOnboardingView.swift in Sources */,
 				2944AC3A607C84D99587F1E0 /* ContentView.swift in Sources */,
 				367FC7FB2FA958FE8368DACB /* InstallManager.swift in Sources */,
 				8CEFC8CDD5B52B45F815D275 /* InstallProgressView.swift in Sources */,

@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @Environment(InstallManager.self) private var installManager
     @State private var selectedCategory: AppCategory? = .all
+    @State private var showBrewOnboarding = false
 
     var body: some View {
         NavigationSplitView {
@@ -11,15 +12,28 @@ struct ContentView: View {
             AppListView(selectedCategory: selectedCategory ?? .all)
         }
         .task {
-            await installManager.checkAlreadyInstalled(AppCatalog.all)
+            // Show Homebrew onboarding if not installed
+            if !BrewChecker.isBrewInstalled {
+                showBrewOnboarding = true
+            } else {
+                await installManager.checkAlreadyInstalled(AppCatalog.all)
+            }
+        }
+        .sheet(isPresented: $showBrewOnboarding) {
+            BrewOnboardingView {
+                showBrewOnboarding = false
+                // Re-check installed apps once brew is confirmed
+                Task { await installManager.checkAlreadyInstalled(AppCatalog.all) }
+            }
         }
         .sheet(isPresented: Bindable(installManager).showProgress) {
             InstallProgressView()
         }
         .alert("Homebrew Not Found", isPresented: Bindable(installManager).showBrewMissingAlert) {
-            Button("OK") {}
+            Button("Install Homebrew") { showBrewOnboarding = true }
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Homebrew is required to install brew packages.\n\nInstall it by running this in Terminal:\n\n/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"")
+            Text("Homebrew is required to install brew packages.")
         }
     }
 }
