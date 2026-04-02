@@ -1,53 +1,77 @@
-# MacSetup
+<p align="center">
+  <img src="MacSetup/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" width="128" height="128" alt="MacSetup">
+</p>
 
-A native macOS app for setting up a new Mac — browse, select, and install all your apps in one click.
+<h1 align="center">MacSetup</h1>
 
-![MacSetup Icon](MacSetup/Assets.xcassets/AppIcon.appiconset/icon_256x256.png)
+<p align="center">
+  The fastest way to provision a new Mac.<br>
+  Browse, select, and install all your apps in one shot — no Terminal required.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/platform-macOS%2014%2B-blue?style=flat-square" alt="macOS 14+">
+  <img src="https://img.shields.io/badge/swift-5.9-orange?style=flat-square&logo=swift" alt="Swift 5.9">
+  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License">
+  <img src="https://img.shields.io/badge/built%20with-SwiftUI-purple?style=flat-square" alt="SwiftUI">
+</p>
+
+---
+
+## What it does
+
+MacSetup is a native macOS app that replaces the usual post-format ritual of hunting down installers one by one. Pick the apps you want from a curated catalog, hit **Install**, and watch the forge run.
+
+Everything is powered by [Homebrew](https://brew.sh) — MacSetup will walk you through installing it if it isn't already there.
+
+---
 
 ## Features
 
-- **Auto-detection** — scans `/Applications` and `brew list` on launch to grey out already-installed apps
-- **Categorized sidebar** — browse by Browsers, Development, AI & LLM, Productivity, Media, Utilities, and CLI Tools with color-coded icons
-- **Search** — quickly find apps across all categories from the toolbar
-- **One-click install** — runs `brew reinstall --cask` / `brew reinstall` for all selected apps sequentially
-- **Live terminal output** — split-pane progress sheet with circular progress ring and color-coded brew logs
-- **Official app icons** — fetches icons from each app's official website, iTunes, or GitHub
-- **Hover interactions** — card-style rows with hover effects and contextual website links
-- **Homebrew onboarding** — prompts new users to install Homebrew before first use
-- **Refresh** — re-scans installed status on demand with glitch-free atomic updates
+- **Smart detection** — scans `/Applications` and `brew list` on launch; already-installed apps are greyed out automatically
+- **Curated catalog** — 30 hand-picked apps across 7 categories: Browsers, Development, AI & LLM, Productivity, Media, Utilities, and CLI Tools
+- **Live forge view** — split-pane progress sheet with per-app status, spinning indicators, and color-coded Homebrew logs
+- **Search** — filter across all categories instantly from the toolbar
+- **Official icons** — pulls each app's real icon from its website, the App Store, or GitHub
+- **Homebrew onboarding** — first-run wizard guides users through Homebrew installation before anything else runs
+- **Refresh** — re-checks installed status on demand with atomic, flicker-free updates
 
-## App Catalog (30 apps)
+---
+
+## Download
+
+**[Download MacSetup.dmg](MacSetup.dmg)** — drag to Applications and launch.
+
+> **Gatekeeper warning?**
+> macOS quarantines unsigned apps downloaded from the web. After dragging to Applications, run:
+> ```zsh
+> xattr -cr /Applications/MacSetup.app
+> ```
+> You only need to do this once.
+
+---
+
+## App Catalog
 
 | Category | Apps |
 |---|---|
 | Browsers | Dia, Arc, Brave, Chrome |
-| Development | VS Code, iTerm2, Xcode, cmux, Antigravity (Google) |
+| Development | VS Code, iTerm2, Xcode, tmux, Antigravity (Google) |
 | AI & LLM | Ollama, Codex, Claude |
 | Productivity | Notion, Notion Calendar, Notion Mail, Raycast, Webex, LINE, Microsoft Word |
 | Media | IINA, Figma, Affinity Publisher 2, Wallpaper Play |
 | Utilities | OneDrive, Stats, Surfshark, Citrix Workspace, Logi Options+, MonitorControl Lite, Amphetamine |
 | CLI Tools | git, gh, node, yabai |
 
-## Quick Install
-
-1. Download **[MacSetup.dmg](MacSetup.dmg)**
-2. Open the DMG and drag **MacSetup.app** into your Applications folder
-3. Launch MacSetup from Applications or Spotlight
-4. If prompted, install Homebrew first — the app will walk you through it
-5. Select the apps you want, click **Install** — done
-
-> **"MacSetup.app is damaged and can't be opened"**
-> macOS quarantines apps downloaded from the internet that aren't notarized by Apple. To fix, run this in Terminal **after dragging to Applications**:
-> ```zsh
-> xattr -cr /Applications/MacSetup.app
-> ```
-> This removes the quarantine flag and the app will open normally. You only need to do this once.
+---
 
 ## Requirements
 
-- macOS 14 (Sonoma) or later
-- [Homebrew](https://brew.sh) — the app will prompt you to install it on first launch if missing
+- macOS 14 Sonoma or later
+- [Homebrew](https://brew.sh) — prompted on first launch if missing
 - Xcode 15+ (to build from source)
+
+---
 
 ## Build from Source
 
@@ -55,26 +79,28 @@ A native macOS app for setting up a new Mac — browse, select, and install all 
 # Install dependencies
 brew install xcodegen
 
-# Generate Xcode project
+# Generate the Xcode project
 xcodegen generate
 
-# Open in Xcode
+# Open and run
 open MacSetup.xcodeproj
 ```
 
-Then press `⌘R` to build and run.
+Press `⌘R` to build and run.
 
-## Build a DMG
+### Build a DMG
 
 ```zsh
 ./make_dmg.sh
 ```
 
-Produces `MacSetup.dmg` in the project root — a standard drag-to-Applications installer.
+Outputs `MacSetup.dmg` in the project root — a standard drag-to-Applications installer.
+
+---
 
 ## Adding Apps
 
-Edit `MacSetup/Models/AppCatalog.swift` and add an `AppItem` entry:
+Open `MacSetup/Models/AppCatalog.swift` and append an `AppItem`:
 
 ```swift
 AppItem(
@@ -82,9 +108,28 @@ AppItem(
     name: "My App",
     category: .utilities,
     method: .brewCask(caskName: "my-app"),
-    bundleName: "My App",          // .app name in /Applications (for installed detection)
+    bundleName: "My App",   // .app bundle name in /Applications
     website: url("https://myapp.com")
 )
 ```
 
-Install methods: `.brewCask`, `.brewFormula`, `.appStore(url:)`, `.manual(url:)`.
+Supported install methods: `.brewCask`, `.brewFormula`, `.appStore(url:)`, `.manual(url:)`.
+
+---
+
+## Contributing
+
+Pull requests are welcome. For major changes, open an issue first to discuss what you'd like to change.
+
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/my-feature`)
+3. Commit your changes
+4. Push and open a PR
+
+---
+
+## License
+
+MIT © [kayuling](https://github.com/kayuling)
+
+See [LICENSE](LICENSE) for the full text.
