@@ -25,6 +25,19 @@ enum AppCategory: String, CaseIterable, Identifiable {
         case .cli:          return "apple.terminal"
         }
     }
+
+    var iconColor: Color {
+        switch self {
+        case .all:          return Color.accentColor
+        case .browsers:     return .blue
+        case .dev:          return .purple
+        case .ai:           return .pink
+        case .productivity: return .orange
+        case .media:        return .red
+        case .utilities:    return .gray
+        case .cli:          return .green
+        }
+    }
 }
 
 enum InstallMethod {

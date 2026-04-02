@@ -11,29 +11,31 @@ struct ContentView: View {
             SidebarView(selectedCategory: $selectedCategory)
         } detail: {
             AppListView(selectedCategory: selectedCategory ?? .all, searchText: searchText)
-                .searchable(text: $searchText, placement: .toolbar, prompt: "Search apps...")
+                .searchable(text: $searchText, placement: .toolbar, prompt: "Search curated apps...")
         }
         .task {
             if !BrewChecker.isBrewInstalled {
-                showBrewOnboarding = true
+                withAnimation { showBrewOnboarding = true }
             } else {
                 await installManager.checkAlreadyInstalled(AppCatalog.all)
             }
         }
         .sheet(isPresented: $showBrewOnboarding) {
             BrewOnboardingView {
-                showBrewOnboarding = false
+                withAnimation { showBrewOnboarding = false }
                 Task { await installManager.checkAlreadyInstalled(AppCatalog.all) }
             }
+            .transition(.move(edge: .bottom).combined(with: .opacity))
         }
         .sheet(isPresented: Bindable(installManager).showProgress) {
             InstallProgressView()
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
         }
         .alert("Homebrew Not Found", isPresented: Bindable(installManager).showBrewMissingAlert) {
             Button("Install Homebrew") { showBrewOnboarding = true }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Homebrew is required to install brew packages.")
+            Text("Homebrew is the engine behind MacSetup. Please install it to continue.")
         }
     }
 }

@@ -8,71 +8,91 @@ struct AppRowProgressView: View {
     private var status: InstallStatus { installManager.session.status(for: item) }
 
     var body: some View {
-        HStack(spacing: 10) {
-            statusIcon
-                .frame(width: 18, height: 18)
+        HStack(spacing: 12) {
+            statusIndicator
+                .frame(width: 20, height: 20)
 
-            Text(item.name)
-                .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
-                .lineLimit(1)
-                .foregroundStyle(rowTextColor)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(item.name)
+                    .font(.system(size: 13, weight: isSelected ? .bold : .medium, design: .rounded))
+                    .foregroundStyle(isSelected ? .primary : .secondary)
+                
+                if case .installing = status {
+                    Text("Installing...")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(Color.accentColor)
+                } else if case .done = status {
+                    Text("Completed")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.green.opacity(0.8))
+                }
+            }
 
             Spacer()
 
-            if case .failed = status {
-                Image(systemName: "exclamationmark.circle.fill")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.red)
-            } else if case .done = status {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(.green)
+            if isSelected {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.tertiary)
             }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 7)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: 7, style: .continuous)
-                .fill(isSelected ? Color.accentColor.opacity(0.12) : Color.clear)
+            ZStack {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.accentColor.opacity(0.1))
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.accentColor.opacity(0.2), lineWidth: 1)
+                }
+            }
         )
         .contentShape(Rectangle())
-    }
-
-    private var rowTextColor: Color {
-        switch status {
-        case .failed:   return .red
-        case .done:     return .primary
-        case .pending:  return .secondary
-        default:        return .primary
-        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: status)
     }
 
     @ViewBuilder
-    private var statusIcon: some View {
-        switch status {
-        case .pending:
-            Image(systemName: "circle")
-                .foregroundStyle(.tertiary)
-                .font(.system(size: 12))
-        case .installing:
-            ProgressView()
-                .scaleEffect(0.55)
-        case .done:
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.green)
-                .font(.system(size: 13))
-        case .failed:
-            Image(systemName: "xmark.circle.fill")
-                .foregroundStyle(.red)
-                .font(.system(size: 13))
-        case .alreadyInstalled:
-            Image(systemName: "checkmark.circle")
-                .foregroundStyle(.quaternary)
-                .font(.system(size: 12))
-        default:
-            Image(systemName: "circle")
-                .foregroundStyle(.quaternary)
-                .font(.system(size: 12))
+    private var statusIndicator: some View {
+        ZStack {
+            switch status {
+            case .pending:
+                Circle()
+                    .stroke(.quaternary, lineWidth: 2)
+            case .installing:
+                Circle()
+                    .stroke(Color.accentColor.opacity(0.2), lineWidth: 2)
+                Circle()
+                    .trim(from: 0, to: 0.3)
+                    .stroke(
+                        AngularGradient(colors: [Color.accentColor, Color.accentColor.opacity(0.1)], center: .center),
+                        style: StrokeStyle(lineWidth: 2, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(installingRotation))
+                    .onAppear {
+                        withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
+                            installingRotation = 360
+                        }
+                    }
+            case .done:
+                Circle()
+                    .fill(.green)
+                Image(systemName: "checkmark")
+                    .font(.system(size: 10, weight: .black))
+                    .foregroundStyle(.white)
+            case .failed:
+                Circle()
+                    .fill(.red)
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .black))
+                    .foregroundStyle(.white)
+            default:
+                Circle()
+                    .stroke(.quaternary, lineWidth: 1)
+            }
         }
     }
+
+    @State private var installingRotation: Double = 0
 }

@@ -4,6 +4,7 @@ import AppKit
 struct InstallProgressView: View {
     @Environment(InstallManager.self) private var installManager
     @State private var selectedLogID: UUID?
+    @State private var animateIn = false
 
     private var selectedItems: [AppItem] {
         AppCatalog.all.filter { installManager.selectedIDs.contains($0.id) }
@@ -11,13 +12,6 @@ struct InstallProgressView: View {
 
     private var doneCount: Int {
         selectedItems.filter { installManager.session.status(for: $0) == .done }.count
-    }
-
-    private var failedCount: Int {
-        selectedItems.filter {
-            if case .failed = installManager.session.status(for: $0) { return true }
-            return false
-        }.count
     }
 
     private var displayedItem: AppItem? {
@@ -31,51 +25,64 @@ struct InstallProgressView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            // Left Panel: Progress Overview
-            VStack(alignment: .leading, spacing: 0) {
-                progressHeader
-                
-                Divider()
-                
-                ScrollView {
-                    VStack(spacing: 1) {
-                        ForEach(selectedItems) { item in
-                            AppRowProgressView(
-                                item: item,
-                                isSelected: displayedItem?.id == item.id
-                            )
-                            .onTapGesture {
-                                selectedLogID = item.id
+        ZStack {
+            // Background: Dark Mesh
+            ForgeBackground()
+                .ignoresSafeArea()
+            
+            HStack(spacing: 0) {
+                // Left Panel: Progress Overview
+                VStack(alignment: .leading, spacing: 0) {
+                    progressHeader
+                    
+                    ScrollView {
+                        VStack(spacing: 4) {
+                            ForEach(selectedItems) { item in
+                                AppRowProgressView(
+                                    item: item,
+                                    isSelected: displayedItem?.id == item.id
+                                )
+                                .onTapGesture {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        selectedLogID = item.id
+                                    }
+                                }
                             }
                         }
+                        .padding(16)
                     }
-                    .padding(.vertical, 8)
                 }
-            }
-            .frame(width: 300)
-            .background(.ultraThinMaterial)
+                .frame(width: 320)
+                .background(.ultraThinMaterial.opacity(0.5))
+                .overlay(
+                    Rectangle()
+                        .fill(.white.opacity(0.05))
+                        .frame(width: 1)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                )
 
-            Divider()
-
-            // Right Panel: Details & Terminal
-            VStack(spacing: 0) {
-                if let item = displayedItem {
-                    TerminalLogView(
-                        item: item,
-                        logs: installManager.session.logs(for: item),
-                        status: installManager.session.status(for: item)
-                    )
-                } else {
-                    emptyTerminal
+                // Right Panel: Details & Terminal
+                VStack(spacing: 0) {
+                    if let item = displayedItem {
+                        ForgeTerminalView(
+                            item: item,
+                            logs: installManager.session.logs(for: item),
+                            status: installManager.session.status(for: item)
+                        )
+                    } else {
+                        emptyForge
+                    }
                 }
             }
         }
-        .frame(minWidth: 900, minHeight: 600)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .frame(minWidth: 1000, minHeight: 700)
+        .colorScheme(.dark)
+        .onAppear {
+            animateIn = true
+        }
         .onChange(of: installManager.session.currentlyInstallingID) { _, newID in
             if selectedLogID == nil || selectedLogID == installManager.session.currentlyInstallingID {
-                selectedLogID = newID
+                withAnimation { selectedLogID = newID }
             }
         }
     }
@@ -83,79 +90,97 @@ struct InstallProgressView: View {
     // MARK: - Header
 
     private var progressHeader: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            progressHeaderTitle
-            progressBarSection
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(installManager.session.isComplete ? "Forge Complete" : "Building Your Mac")
+                        .font(.system(size: 20, weight: .black, design: .rounded))
+                    
+                    Text("\(doneCount) of \(selectedItems.count) apps forged")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.secondary)
+                }
+                
+                Spacer()
+                
+                if installManager.session.isComplete {
+                    Button {
+                        withAnimation { installManager.showProgress = false }
+                    } label: {
+                        Text("Finish")
+                            .font(.system(size: 12, weight: .black))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.accentColor, in: Capsule())
+                            .shadow(color: Color.accentColor.opacity(0.5), radius: 10, y: 5)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            
+            ForgeProgressBar(pct: Double(doneCount) / Double(max(selectedItems.count, 1)))
         }
         .padding(24)
     }
 
-    @ViewBuilder
-    private var progressHeaderTitle: some View {
-        HStack {
-            let title = installManager.session.isComplete ? "Setup Complete" : "Installing Your Mac"
-            Text(title)
-                .font(.system(size: 18, weight: .black, design: .rounded))
-            Spacer()
-            if installManager.session.isComplete {
-                Button {
-                    installManager.showProgress = false
-                } label: {
-                    Text("Done")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 6)
-                        .background(Color.accentColor, in: Capsule())
-                }
-                .buttonStyle(.plain)
+    private var emptyForge: some View {
+        VStack(spacing: 24) {
+            ZStack {
+                Circle()
+                    .stroke(.white.opacity(0.1), lineWidth: 1)
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "hammer.fill")
+                    .font(.system(size: 48, weight: .ultraLight))
+                    .foregroundStyle(.quaternary)
+                    .rotationEffect(.degrees(animateIn ? 0 : -20))
+                    .animation(.spring(response: 1, dampingFraction: 0.5).repeatForever(autoreverses: true), value: animateIn)
             }
-        }
-    }
-
-    @ViewBuilder
-    private var progressBarSection: some View {
-        let pct = Int(Double(doneCount) / Double(max(selectedItems.count, 1)) * 100)
-        VStack(spacing: 8) {
-            HStack {
-                Text("\(doneCount) of \(selectedItems.count) apps installed")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text("\(pct)%")
-                    .font(.system(size: 12, weight: .bold, design: .monospaced))
-                    .foregroundStyle(Color.accentColor)
-            }
-            GeometryReader { geo in
-                let fillWidth = geo.size.width * CGFloat(doneCount) / CGFloat(max(selectedItems.count, 1))
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.primary.opacity(0.05))
-                    Capsule()
-                        .fill(LinearGradient(colors: [.accentColor, .accentColor.opacity(0.7)], startPoint: .leading, endPoint: .trailing))
-                        .frame(width: fillWidth)
-                }
-            }
-            .frame(height: 6)
-        }
-    }
-
-    private var emptyTerminal: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "terminal")
-                .font(.system(size: 48, weight: .ultraLight))
-                .foregroundStyle(.quaternary)
-            Text("Select an app to view logs")
+            Text("Select an app to inspect the forge")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(red: 0.05, green: 0.05, blue: 0.07))
     }
 }
 
-// MARK: - Terminal Log Panel
+// MARK: - Forge Components
 
-private struct TerminalLogView: View {
+struct ForgeProgressBar: View {
+    let pct: Double
+
+    var body: some View {
+        VStack(spacing: 8) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.white.opacity(0.05))
+                    
+                    Capsule()
+                        .fill(
+                            LinearGradient(colors: [Color.accentColor, Color.accentColor.opacity(0.7)], startPoint: .leading, endPoint: .trailing)
+                        )
+                        .frame(width: geo.size.width * CGFloat(pct))
+                        .shadow(color: Color.accentColor.opacity(0.5), radius: 10, x: 0, y: 0)
+                }
+            }
+            .frame(height: 6)
+            
+            HStack {
+                Text("PROVISIONING ENGINE")
+                    .font(.system(size: 8, weight: .black))
+                    .foregroundStyle(.tertiary)
+                    .tracking(1)
+                Spacer()
+                Text("\(Int(pct * 100))%")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .foregroundStyle(Color.accentColor)
+            }
+        }
+    }
+}
+
+private struct ForgeTerminalView: View {
     let item: AppItem
     let logs: [String]
     let status: InstallStatus
@@ -163,17 +188,24 @@ private struct TerminalLogView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            HStack(spacing: 16) {
+            HStack(spacing: 20) {
                 AppIconView(item: item)
                     .scaleEffect(0.6)
                     .frame(width: 32, height: 32)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.name)
-                        .font(.system(size: 14, weight: .bold, design: .rounded))
-                    Text(statusLabel)
-                        .font(.system(size: 10, weight: .black))
-                        .foregroundStyle(statusColor)
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                    
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(statusColor)
+                            .frame(width: 6, height: 6)
+                        Text(statusLabel)
+                            .font(.system(size: 9, weight: .black))
+                            .foregroundStyle(statusColor)
+                            .tracking(1)
+                    }
                 }
                 
                 Spacer()
@@ -183,109 +215,114 @@ private struct TerminalLogView: View {
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString(logs.joined(separator: "\n"), forType: .string)
                     } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "doc.on.clipboard.fill")
-                            Text("Copy Logs")
-                        }
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.white.opacity(0.05), in: Capsule())
+                        Label("Copy Output", systemImage: "terminal.fill")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(.white.opacity(0.05), in: Capsule())
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 16)
-            .background(Color(red: 0.08, green: 0.08, blue: 0.10))
+            .padding(.horizontal, 32)
+            .padding(.vertical, 24)
+            .background(.ultraThinMaterial.opacity(0.3))
 
             Divider().opacity(0.1)
 
-            logOutput
-        }
-        .background(Color(red: 0.05, green: 0.05, blue: 0.07))
-    }
-
-    private var logOutput: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 2) {
-                    ForEach(Array(logs.enumerated()), id: \.offset) { _, line in
-                        Text(line)
-                            .font(.system(size: 12, weight: .medium, design: .monospaced))
-                            .foregroundStyle(lineColor(line))
-                            .textSelection(.enabled)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .lineLimit(nil)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    if case .installing = status {
-                        BlinkingCursor()
-                    }
-
-                    Color.clear.frame(height: 1).id("bottom")
-                }
-                .padding(24)
-            }
-            .onChange(of: logs.count) {
-                proxy.scrollTo("bottom", anchor: .bottom)
-            }
-            .onAppear {
-                proxy.scrollTo("bottom", anchor: .bottom)
-            }
+            ForgeLogOutput(logs: logs, isInstalling: status == .installing)
         }
     }
 
     private var statusLabel: String {
         switch status {
-        case .pending: return "WAITING..."
-        case .installing: return "INSTALLING..."
-        case .done: return "COMPLETED"
-        case .failed: return "FAILED"
-        case .alreadyInstalled: return "ALREADY INSTALLED"
-        case .notInstalled: return "NOT INSTALLED"
+        case .pending: return "PENDING"
+        case .installing: return "FORGING..."
+        case .done: return "STABILIZED"
+        case .failed: return "CRITICAL ERROR"
+        case .alreadyInstalled: return "VERIFIED"
+        case .notInstalled: return "IDLE"
         }
     }
 
     private var statusColor: Color {
         switch status {
         case .pending: return .secondary
-        case .installing: return .accentColor
+        case .installing: return Color.accentColor
         case .done: return .green
         case .failed: return .red
         case .alreadyInstalled: return .green
         case .notInstalled: return .secondary
         }
     }
+}
+
+struct ForgeLogOutput: View {
+    let logs: [String]
+    let isInstalling: Bool
+
+    var body: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 4) {
+                    ForEach(Array(logs.enumerated()), id: \.offset) { _, line in
+                        Text(line)
+                            .font(.system(size: 12, weight: .medium, design: .monospaced))
+                            .foregroundStyle(lineColor(line))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
+                    if isInstalling {
+                        HStack(spacing: 8) {
+                            Rectangle()
+                                .fill(Color.accentColor)
+                                .frame(width: 8, height: 14)
+                                .opacity(0.8)
+                            Text("EXECUTING TASK...")
+                                .font(.system(size: 10, weight: .black, design: .monospaced))
+                                .foregroundStyle(Color.accentColor.opacity(0.6))
+                        }
+                        .padding(.top, 4)
+                    }
+
+                    Color.clear.frame(height: 1).id("bottom")
+                }
+                .padding(32)
+            }
+            .onChange(of: logs.count) {
+                withAnimation { proxy.scrollTo("bottom", anchor: .bottom) }
+            }
+        }
+    }
 
     private func lineColor(_ line: String) -> Color {
         let lower = line.lowercased()
-        if lower.contains("error:") || lower.contains("failed") || lower.contains("abort") {
-            return Color(red: 1.0, green: 0.4, blue: 0.4)
-        } else if lower.contains("warning:") || lower.contains("warn:") {
-            return Color(red: 1.0, green: 0.8, blue: 0.3)
-        } else if line.hasPrefix("==>") {
-            return .accentColor
-        }
-        return Color(white: 0.7)
+        if lower.contains("error:") || lower.contains("failed") { return .red.opacity(0.8) }
+        if lower.contains("warning:") { return .orange.opacity(0.8) }
+        if line.hasPrefix("==>") { return Color.accentColor }
+        return .white.opacity(0.6)
     }
 }
 
-private struct BlinkingCursor: View {
-    @State private var visible = true
-
+struct ForgeBackground: View {
     var body: some View {
-        Rectangle()
-            .fill(Color.accentColor)
-            .frame(width: 8, height: 14)
-            .opacity(visible ? 1 : 0)
-            .onAppear {
-                withAnimation(.easeInOut(duration: 0.5).repeatForever()) {
-                    visible = false
-                }
-            }
+        ZStack {
+            Color(red: 0.02, green: 0.02, blue: 0.04)
+            
+            Circle()
+                .fill(Color.accentColor.opacity(0.1))
+                .frame(width: 800, height: 800)
+                .blur(radius: 150)
+                .offset(x: 200, y: -200)
+            
+            Circle()
+                .fill(Color.purple.opacity(0.05))
+                .frame(width: 600, height: 600)
+                .blur(radius: 120)
+                .offset(x: -300, y: 300)
+        }
     }
 }
 

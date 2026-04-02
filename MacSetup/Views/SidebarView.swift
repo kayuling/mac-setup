@@ -6,33 +6,10 @@ struct SidebarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // App branding header
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 12) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(LinearGradient(colors: [.accentColor, .accentColor.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .frame(width: 32, height: 32)
-                        
-                        Image(systemName: "laptopcomputer.and.arrow.down")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("MacSetup")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                        Text("Personal Curator")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.top, 24)
-            .padding(.bottom, 20)
-
+            // Branding
+            brandingHeader
+            
+            // Categories
             List(AppCategory.allCases, selection: $selectedCategory) { category in
                 CategoryRow(
                     category: category,
@@ -42,55 +19,99 @@ struct SidebarView: View {
                 )
                 .tag(category)
                 .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 2, leading: 10, bottom: 2, trailing: 10))
+                .listRowInsets(EdgeInsets(top: 2, leading: 12, bottom: 2, trailing: 12))
             }
             .listStyle(.sidebar)
             .scrollContentBackground(.hidden)
 
             Spacer()
 
-            // Quick stats footer
-            VStack(spacing: 12) {
-                let installed = AppCatalog.all.filter { installManager.session.status(for: $0) == .alreadyInstalled }.count
-                
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(installed) Apps Installed")
-                            .font(.system(size: 11, weight: .semibold))
-                        
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                Capsule()
-                                    .fill(Color.primary.opacity(0.05))
-                                    .frame(height: 4)
-                                
-                                Capsule()
-                                    .fill(LinearGradient(colors: [.green, .green.opacity(0.7)], startPoint: .leading, endPoint: .trailing))
-                                    .frame(width: geo.size.width * CGFloat(installed) / CGFloat(max(1, AppCatalog.all.count)), height: 4)
-                            }
-                        }
-                        .frame(height: 4)
-                    }
-                }
-                
-                if installManager.isRunning {
-                    HStack(spacing: 8) {
-                        ProgressView()
-                            .scaleEffect(0.5)
-                            .frame(width: 12, height: 12)
-                        Text("Installing...")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 10)
-                    .background(Color.primary.opacity(0.05), in: Capsule())
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 20)
+            // Status Footer
+            statusFooter
         }
-        .navigationSplitViewColumnWidth(min: 220, ideal: 240)
+        .navigationSplitViewColumnWidth(min: 240, ideal: 260)
+        .background(.ultraThinMaterial)
+    }
+
+    // MARK: - Components
+
+    private var brandingHeader: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(LinearGradient(colors: [Color.accentColor, Color.accentColor.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .frame(width: 36, height: 36)
+                
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 18, weight: .black))
+                    .foregroundStyle(.white)
+            }
+            
+            VStack(alignment: .leading, spacing: 0) {
+                Text("MacSetup")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                Text("PROVISIONING TOOL")
+                    .font(.system(size: 9, weight: .black))
+                    .foregroundStyle(.secondary)
+                    .tracking(1)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 24)
+        .padding(.top, 32)
+        .padding(.bottom, 24)
+    }
+
+    private var statusFooter: some View {
+        VStack(spacing: 16) {
+            let installed = AppCatalog.all.filter { installManager.session.status(for: $0) == .alreadyInstalled }.count
+            
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("System Status")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text("\(installed)/\(AppCatalog.all.count)")
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                        .foregroundStyle(Color.accentColor)
+                }
+
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Color.primary.opacity(0.05))
+                            .frame(height: 4)
+                        
+                        Capsule()
+                            .fill(LinearGradient(colors: [.green, .green.opacity(0.7)], startPoint: .leading, endPoint: .trailing))
+                            .frame(width: geo.size.width * CGFloat(installed) / CGFloat(max(1, AppCatalog.all.count)), height: 4)
+                    }
+                }
+                .frame(height: 4)
+            }
+            
+            if installManager.isRunning {
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(0.5)
+                        .frame(width: 12, height: 12)
+                    Text("FORGING IN PROGRESS")
+                        .font(.system(size: 9, weight: .black))
+                        .foregroundStyle(Color.accentColor)
+                        .tracking(0.5)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(Color.accentColor.opacity(0.1), in: Capsule())
+            }
+        }
+        .padding(24)
+        .background(
+            Rectangle()
+                .fill(.primary.opacity(0.02))
+                .ignoresSafeArea()
+        )
     }
 }
 
@@ -103,54 +124,42 @@ private struct CategoryRow: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 12) {
             ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(isSelected ? category.iconColor : category.iconColor.opacity(0.1))
-                    .frame(width: 28, height: 28)
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(isSelected ? category.iconColor : category.iconColor.opacity(0.15))
+                    .frame(width: 32, height: 32)
                 
                 Image(systemName: category.systemImage)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(isSelected ? .white : category.iconColor)
             }
             
             Text(category.rawValue)
-                .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
+                .font(.system(size: 14, weight: isSelected ? .bold : .semibold, design: .rounded))
+                .foregroundStyle(isSelected ? .primary : .secondary)
             
             Spacer()
             
             if selectedCount > 0 {
                 Text("\(selectedCount)")
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .font(.system(size: 10, weight: .black, design: .monospaced))
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(isSelected ? Color.white.opacity(0.3) : Color.accentColor, in: Capsule())
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(isSelected ? Color.white.opacity(0.2) : Color.accentColor, in: Capsule())
             } else {
                 Text("\(totalCount)")
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-                    .foregroundStyle(.secondary.opacity(0.5))
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .foregroundStyle(.tertiary)
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
         .padding(.horizontal, 8)
-    }
-}
-
-// MARK: - Category Icon Colors
-
-extension AppCategory {
-    var iconColor: Color {
-        switch self {
-        case .all:          return .accentColor
-        case .browsers:     return .blue
-        case .dev:          return .purple
-        case .ai:           return .pink
-        case .productivity: return .orange
-        case .media:        return .red
-        case .utilities:    return .gray
-        case .cli:          return .green
-        }
+        .background(
+            isSelected ? Color.primary.opacity(0.05) : Color.clear,
+            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+        )
     }
 }
 

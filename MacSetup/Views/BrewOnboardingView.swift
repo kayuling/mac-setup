@@ -6,188 +6,286 @@ struct BrewOnboardingView: View {
 
     @State private var isChecking = false
     @State private var copied = false
+    @State private var animateIn = false
 
     private let installCommand = #"/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)""#
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header with sophisticated graphics
-            ZStack {
-                LinearGradient(
-                    colors: [Color.orange.opacity(0.15), Color.clear],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 180)
-                
-                VStack(spacing: 16) {
-                    ZStack {
-                        Circle()
-                            .fill(.white)
-                            .shadow(color: .orange.opacity(0.3), radius: 20, y: 10)
-                            .frame(width: 80, height: 80)
-                        
-                        Image(systemName: "shippingbox.fill")
-                            .font(.system(size: 36, weight: .bold))
-                            .foregroundStyle(
-                                LinearGradient(colors: [.orange, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
-                            )
+        ZStack {
+            // Background Mesh Gradient
+            MeshGradientBackground()
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Main Content
+                ScrollView {
+                    VStack(spacing: 40) {
+                        headerSection
+                        stepsSection
+                        commandSection
                     }
-                    
-                    VStack(spacing: 4) {
-                        Text("Homebrew Required")
-                            .font(.system(size: 24, weight: .black, design: .rounded))
-                        
-                        Text("The missing package manager for macOS")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.secondary)
-                    }
+                    .padding(.top, 60)
+                    .padding(.bottom, 120)
                 }
+                .scrollIndicators(.hidden)
             }
-            .padding(.top, 40)
-
-            // Content
-            VStack(spacing: 32) {
-                VStack(alignment: .leading, spacing: 12) {
-                    Label("What is Homebrew?", systemImage: "info.circle.fill")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(.orange)
-                    
-                    Text("Homebrew is a powerful command-line tool that allows MacSetup to automate the installation of your favorite applications and developer tools.")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.secondary)
-                        .lineSpacing(4)
-                }
-                .padding(.horizontal, 40)
-                
-                // Command Area
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("RUN THIS COMMAND IN TERMINAL")
-                        .font(.system(size: 10, weight: .black))
-                        .foregroundStyle(.tertiary)
-                        .tracking(1)
-
-                    HStack(spacing: 0) {
-                        Text(installCommand)
-                            .font(.system(size: 11, weight: .medium, design: .monospaced))
-                            .foregroundStyle(.primary)
-                            .padding(16)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color.black.opacity(0.05))
-                        
-                        Button {
-                            NSPasteboard.general.clearContents()
-                            NSPasteboard.general.setString(installCommand, forType: .string)
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                                copied = true
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                withAnimation { copied = false }
-                            }
-                        } label: {
-                            ZStack {
-                                if copied {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(.green)
-                                        .transition(.scale.combined(with: .opacity))
-                                } else {
-                                    Image(systemName: "doc.on.doc.fill")
-                                        .foregroundStyle(.secondary)
-                                        .transition(.scale.combined(with: .opacity))
-                                }
-                            }
-                            .frame(width: 48, height: 48)
-                            .background(Color.black.opacity(0.1))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
-                }
-                .padding(.horizontal, 40)
-            }
-            .padding(.top, 20)
-
-            Spacer()
-
-            // Action Bar
-            HStack(spacing: 16) {
-                Button("Later") {
-                    onDismiss()
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-                .font(.system(size: 13, weight: .bold))
-
+            
+            // Fixed Bottom Bar
+            VStack {
                 Spacer()
-
-                Button {
-                    NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/Terminal.app"))
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "terminal.fill")
-                        Text("Open Terminal")
-                    }
-                    .font(.system(size: 13, weight: .bold))
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color.primary.opacity(0.05), in: Capsule())
-                }
-                .buttonStyle(.plain)
-
-                Button {
-                    isChecking = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                        isChecking = false
-                        if BrewChecker.isBrewInstalled {
-                            onDismiss()
-                        }
-                    }
-                } label: {
-                    ZStack {
-                        if isChecking {
-                            ProgressView().scaleEffect(0.6)
-                                .brightness(1)
-                        } else {
-                            Text("I've installed it")
-                        }
-                    }
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 10)
-                    .background(
-                        Capsule()
-                            .fill(LinearGradient(colors: [.orange, .red], startPoint: .topLeading, endPoint: .bottomTrailing))
-                    )
-                    .shadow(color: .orange.opacity(0.3), radius: 10, y: 5)
-                }
-                .buttonStyle(.plain)
-                .disabled(isChecking)
+                actionBar
             }
-            .padding(.horizontal, 40)
-            .padding(.bottom, 40)
         }
-        .frame(width: 540, height: 620)
-        .background(.background)
+        .frame(width: 680, height: 740)
+        .onAppear {
+            withAnimation(.spring(response: 0.8, dampingFraction: 0.8)) {
+                animateIn = true
+            }
+        }
+    }
+
+    // MARK: - Header
+
+    private var headerSection: some View {
+        VStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .fill(.ultraThinMaterial)
+                    .frame(width: 120, height: 120)
+                    .overlay(
+                        Circle()
+                            .stroke(LinearGradient(colors: [.white.opacity(0.5), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+                    )
+                
+                Image(systemName: "shippingbox.fill")
+                    .font(.system(size: 52, weight: .bold))
+                    .foregroundStyle(
+                        LinearGradient(colors: [.orange, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
+                    .shadow(color: .orange.opacity(0.5), radius: 20, y: 10)
+                    .scaleEffect(animateIn ? 1 : 0.5)
+                    .rotationEffect(.degrees(animateIn ? 0 : -20))
+            }
+            
+            VStack(spacing: 8) {
+                Text("Welcome to MacSetup")
+                    .font(.system(size: 34, weight: .black, design: .rounded))
+                
+                Text("We need Homebrew to handle the heavy lifting.")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(.secondary)
+            }
+            .opacity(animateIn ? 1 : 0)
+            .offset(y: animateIn ? 0 : 20)
+        }
+    }
+
+    // MARK: - Steps
+
+    private var stepsSection: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            StepView(number: 1, title: "Copy Command", description: "Grab the installation script below.", isComplete: copied)
+            StepView(number: 2, title: "Open Terminal", description: "Standard macOS utility for commands.", isComplete: false)
+            StepView(number: 3, title: "Paste & Execute", description: "Follow prompts in the terminal window.", isComplete: false)
+        }
+        .padding(.horizontal, 60)
+        .opacity(animateIn ? 1 : 0)
+        .offset(y: animateIn ? 0 : 30)
+    }
+
+    // MARK: - Command
+
+    private var commandSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("INSTALLATION SCRIPT")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(.secondary)
+                    .tracking(1)
+                Spacer()
+                if copied {
+                    Text("Copied to clipboard!")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.green)
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
+            }
+
+            HStack(spacing: 0) {
+                Text(installCommand)
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .padding(.horizontal, 20)
+                    .frame(height: 60)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.ultraThinMaterial)
+                
+                Button {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(installCommand, forType: .string)
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        copied = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        withAnimation { copied = false }
+                    }
+                } label: {
+                    Label("Copy", systemImage: copied ? "checkmark" : "doc.on.doc")
+                        .font(.system(size: 13, weight: .bold))
+                        .padding(.horizontal, 24)
+                        .frame(height: 60)
+                        .background(copied ? Color.green : Color.primary)
+                        .foregroundStyle(copied ? .white : (Color(nsColor: .windowBackgroundColor)))
+                }
+                .buttonStyle(.plain)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(.white.opacity(0.1), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.1), radius: 20, y: 10)
+        }
+        .padding(.horizontal, 60)
+        .opacity(animateIn ? 1 : 0)
+        .offset(y: animateIn ? 0 : 40)
+    }
+
+    // MARK: - Action Bar
+
+    private var actionBar: some View {
+        HStack(spacing: 20) {
+            Button("Dismiss") {
+                onDismiss()
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(.secondary)
+            
+            Spacer()
+            
+            Button {
+                NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Utilities/Terminal.app"))
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "terminal.fill")
+                    Text("Launch Terminal")
+                }
+                .font(.system(size: 14, weight: .bold))
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(.ultraThinMaterial, in: Capsule())
+                .overlay(Capsule().stroke(.white.opacity(0.2), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            
+            Button {
+                isChecking = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    isChecking = false
+                    if BrewChecker.isBrewInstalled {
+                        withAnimation { onDismiss() }
+                    }
+                }
+            } label: {
+                HStack(spacing: 10) {
+                    if isChecking {
+                        ProgressView().scaleEffect(0.7).brightness(1)
+                    } else {
+                        Text("I'm Ready")
+                        Image(systemName: "arrow.right")
+                    }
+                }
+                .font(.system(size: 14, weight: .black))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 14)
+                .background(
+                    Capsule()
+                        .fill(LinearGradient(colors: [.orange, .red], startPoint: .topLeading, endPoint: .bottomTrailing))
+                )
+                .shadow(color: .orange.opacity(0.4), radius: 15, y: 8)
+            }
+            .buttonStyle(.plain)
+            .disabled(isChecking)
+        }
+        .padding(.horizontal, 40)
+        .padding(.vertical, 30)
+        .background(
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .mask(LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom))
+        )
     }
 }
 
-private struct StepRow: View {
-    let number: Int
-    let text: String
+// MARK: - Supporting Views
+
+struct MeshGradientBackground: View {
+    @State private var t: CGFloat = 0
 
     var body: some View {
-        HStack(spacing: 12) {
-            Text("\(number)")
-                .font(.system(size: 10, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .frame(width: 20, height: 20)
-                .background(Color.accentColor.opacity(0.8), in: Circle())
+        TimelineView(.animation) { timeline in
+            let date = timeline.date.timeIntervalSince1970
+            let angle = Angle(radians: date * 0.2)
+            
+            ZStack {
+                Color(nsColor: .windowBackgroundColor)
+                
+                Circle()
+                    .fill(Color.orange.opacity(0.15))
+                    .frame(width: 600, height: 600)
+                    .offset(x: cos(date * 0.3) * 100, y: sin(date * 0.4) * 100)
+                    .blur(radius: 100)
+                
+                Circle()
+                    .fill(Color.red.opacity(0.1))
+                    .frame(width: 500, height: 500)
+                    .offset(x: sin(date * 0.5) * 150, y: cos(date * 0.3) * 150)
+                    .blur(radius: 120)
+                
+                Circle()
+                    .fill(Color.accentColor.opacity(0.1))
+                    .frame(width: 400, height: 400)
+                    .offset(x: cos(date * 0.4) * 200, y: sin(date * 0.2) * 200)
+                    .blur(radius: 100)
+            }
+        }
+    }
+}
 
-            Text(text)
-                .font(.system(size: 13))
-                .foregroundStyle(.primary)
+struct StepView: View {
+    let number: Int
+    let title: String
+    let description: String
+    let isComplete: Bool
+
+    var body: some View {
+        HStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .fill(isComplete ? Color.green : Color.primary.opacity(0.05))
+                    .frame(width: 40, height: 40)
+                
+                if isComplete {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                } else {
+                    Text("\(number)")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.primary)
+                }
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 16, weight: .bold))
+                Text(description)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }
