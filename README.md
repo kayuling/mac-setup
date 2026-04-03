@@ -12,7 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/platform-macOS%2014%2B-blue?style=flat-square" alt="macOS 14+">
   <img src="https://img.shields.io/badge/swift-5.9-orange?style=flat-square&logo=swift" alt="Swift 5.9">
-  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License">
+  <img src="https://img.shields.io/badge/license-Elastic--2.0-blue?style=flat-square" alt="Elastic License 2.0">
   <img src="https://img.shields.io/badge/built%20with-SwiftUI-purple?style=flat-square" alt="SwiftUI">
 </p>
 
@@ -130,6 +130,6 @@ Pull requests are welcome. For major changes, open an issue first to discuss wha
 
 ## License
 
-MIT © [kayuling](https://github.com/kayuling)
+[Elastic License 2.0](LICENSE) © [kayuling](https://github.com/kayuling)
 
-See [LICENSE](LICENSE) for the full text.
+Free to use and modify. You may not offer the software as a hosted/managed service to third parties. See [LICENSE](LICENSE) for the full text.
